@@ -21,4 +21,10 @@ add_executable(app
 
 
 target_link_libraries(app sfml-graphics sfml-window sfml-system)
-target_compile_options(app PRIVATE -Wall -Wextra -pedantic -Wno-missing-field-initializers)
+
+if(MSVC)
+    target_compile_options(app PRIVATE /W4)
+else()
+    target_compile_options(app PRIVATE -Wall -Wextra -pedantic -Wno-missing-field-initializers)
+endif()
+    target_compile_options(app PRIVATE -Wall -Wextra -pedantic -Wno-missing-field-initializers)
