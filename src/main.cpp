@@ -28,10 +28,14 @@ void setUpMap(Map &gameMap){
 
 
 int main() {
+
     sf::Vector2u windowSize = {800, 600};
     sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
     window.setFramerateLimit(60); // frame rate
 
+
+
+    // TODO make viewrect smaller than window size and scale up
     sf::Rect<float> viewRect(sf::Vector2f(0,0), sf::Vector2f(static_cast<float>(windowSize.x), static_cast<float>(windowSize.y)));
     Camera camera(&window, viewRect);
 
@@ -45,15 +49,17 @@ int main() {
     // Create a Light object at the player's initial position
     Light light(Vector2<double>(player.getX(), player.getY()));
     // Set up the ObstacleManager if required by Light
-    ObstacleManager obstacleManager;
+    ObstacleManager obstacle_manager;
 
     Obstacle obstacle1(Vector2<double>(100, 100), Vector2<double>(200, 100));
-    obstacleManager.addObstacle(obstacle1);
+    obstacle_manager.addObstacle(obstacle1);
 
     const float movementSpeed = 5.0f;
 
     Map gameMap;
     setUpMap(gameMap);
+    obstacle_manager.buildObstacleMap(gameMap);
+
 
     while (window.isOpen()) {
         sf::Event event;
@@ -75,7 +81,7 @@ int main() {
         light.setPosition(Vector2<double>(player.getX(), player.getY()));
 
         // Update the light's rays based on the current scene
-        light.castRays(obstacleManager);
+        light.castRays(obstacle_manager);
        
 
         camera.setPosition(sf::Vector2f(static_cast<float>(player.getX()), static_cast<float>(player.getY())));
@@ -88,7 +94,7 @@ int main() {
 
         // Draw the light
         light.draw(window);
-        obstacleManager.draw(window);
+        obstacle_manager.draw(window);
 
         window.display();
     }

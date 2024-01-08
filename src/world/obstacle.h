@@ -16,7 +16,7 @@ public:
     void draw(sf::RenderWindow& window) {
         sf::Vertex line[] = {
             sf::Vertex(sf::Vector2f(static_cast<float>(start.GetX()), static_cast<float>(start.GetY())), sf::Color::White),
-            sf::Vertex(sf::Vector2f(static_cast<float>(end.GetX()), static_cast<float>(end.GetY())), sf::Color::White)
+            sf::Vertex(sf::Vector2f(static_cast<float>(end.GetX()), static_cast<float>(end.GetY())), sf::Color::Green)
         };
         
         window.draw(line, 2, sf::PrimitiveType::Lines);
