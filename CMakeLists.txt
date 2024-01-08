@@ -9,7 +9,7 @@ set(CMAKE_ERROR_DEPRECATED True)
 
 # SFML submodule
 add_subdirectory(libs/SFML)
-include_directories(${SFML_INCLUDE_DIR})
+# include_directories(${SFML_INCLUDE_DIR})
 
 
 add_executable(app
@@ -27,4 +27,3 @@ if(MSVC)
 else()
     target_compile_options(app PRIVATE -Wall -Wextra -pedantic -Wno-missing-field-initializers)
 endif()
-    target_compile_options(app PRIVATE -Wall -Wextra -pedantic -Wno-missing-field-initializers)
