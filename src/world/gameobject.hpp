@@ -15,6 +15,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <ostream>
+#include "utils/vec.h"
 
 class GameObject {
 
@@ -23,12 +24,12 @@ protected:
     sf::Texture texture_;
     sf::Sprite sprite_;
     std::string id_;
-    double x_, y_;
+    Vector2<double> pos_;
 
 public:
 
     GameObject();
-    GameObject(double x, double y, sf::Texture texture);
+    GameObject(Vector2<double> pos, sf::Texture texture);
     ~GameObject();
 
     double getX() const;
@@ -44,30 +45,30 @@ public:
     std::ostream friend &operator<<(std::ostream &os, GameObject &object); // Print Game object info
 
 };
-GameObject::GameObject(): x_(0), y_(0), sprite_(sf::Sprite(texture_)) {
+GameObject::GameObject(): pos_(Vector2<double>()), sprite_(sf::Sprite(texture_)) {
     texture_.loadFromFile("assets/default.png");
 }
 
-GameObject::GameObject(double x, double y, sf::Texture texture): x_(x), y_(y), texture_(texture), sprite_(sf::Sprite(texture)), id_("object id") {
+GameObject::GameObject(Vector2<double> pos, sf::Texture texture): pos_(pos), texture_(texture), sprite_(sf::Sprite(texture)), id_("object id") {
 
 }
 
 GameObject::~GameObject() { }
 
-double GameObject::getX() const { return x_; }
-double GameObject::getY() const { return y_; }
+double GameObject::getX() const { return pos_.GetX(); }
+double GameObject::getY() const { return pos_.GetY(); }
 
-bool GameObject::setX(double x) { x_ = x; return true;}
-bool GameObject::setY(double y) { y_ = y; return true;}
+bool GameObject::setX(double x) { pos_.SetX(x); return true;}
+bool GameObject::setY(double y) { pos_.SetY(y); return true;}
 
-void GameObject::updateSpritePos(){ sprite_.setPosition(sf::Vector2f(x_, y_)); }
+void GameObject::updateSpritePos(){ sprite_.setPosition(sf::Vector2f(static_cast<float>(pos_.GetX()), static_cast<float>(pos_.GetY()))); }
 
 void GameObject::draw(sf::RenderWindow &window) {
     window.draw(sprite_); 
 }
 
 std::ostream& operator<<(std::ostream &os, GameObject &object) {
-    os << "GameObject: " << object.id_ << "(" << object.x_ << ", " << object.y_ << ")" << std::endl;
+    os << "GameObject: " << object.id_ << "(" << object.pos_.GetX() << ", " << object.pos_.GetY() << ")" << std::endl;
     return os;
 }
 

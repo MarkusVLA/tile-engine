@@ -7,23 +7,33 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_ERROR_DEPRECATED True)
 
 
+# Set the build type if it's not already set
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Set compiler optimization flags
+if(apple OR unix)
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+  set(OUTPUT_DIR "Release")
+
+elseif(WIN32)
+  set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+  set(OUTPUT_DIR "")
+endif()
+
+
 # SFML submodule
 add_subdirectory(libs/SFML)
-# include_directories(${SFML_INCLUDE_DIR})
-
+include_directories(${SFML_INCLUDE_DIR})
 
 add_executable(app
-
     # All source files
     src/main.cpp
-
 )
-
 
 target_link_libraries(app sfml-graphics sfml-window sfml-system)
 
-if(MSVC)
-    target_compile_options(app PRIVATE /W4)
-else()
-    target_compile_options(app PRIVATE -Wall -Wextra -pedantic -Wno-missing-field-initializers)
-endif()
+set_target_properties(app PROPERTIES
+    EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../${OUTPUT_DIR}"
+)

@@ -31,8 +31,8 @@ public:
 
     void draw(sf::RenderWindow &window) {
         // Draw all tiles to game window.
-        for (int i = 0; i < tiles_.size(); i++){
-            tiles_[i].draw(window);
+        for (auto tile : tiles_) {
+            tile.draw(window);
         }
     }
 

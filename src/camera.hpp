@@ -11,8 +11,9 @@
 
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "player.hpp"
-#include "map.hpp"
+#include "world/player.hpp"
+#include "world/map.hpp"
+#include "utils/vec.h"
 
 #define TILESIZE 16
 
@@ -45,9 +46,7 @@ Camera::Camera(sf::RenderWindow* window, const sf::FloatRect& viewRect)
     : window_(window), view_(viewRect) {
 }
 
-Camera::~Camera() {
-    // Destructor code if needed
-}
+Camera::~Camera() { }
 
 void Camera::move(const sf::Vector2f& delta) {
     view_.move(delta);
