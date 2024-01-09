@@ -1,7 +1,11 @@
+// Fragment Shader
 #version 330 core
 
-void main() {
- 
-    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);      // Outside light area
+out vec4 FragColor;
+in vec2 TexCoord;
 
+
+void main() {
+    vec4 finalColor = vec4(1.0, 1.0, 1.0, 1.0);
+    FragColor = finalColor;
 }

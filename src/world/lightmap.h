@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include "../utils/rect.h"
 
+
+
 class LightMap {
 private:
     std::vector<Light*> lights;
@@ -42,22 +44,9 @@ public:
         renderTexture_.create({size.x, size.y});
     }
 
-    void drawDebugRays(sf::RenderTarget &target) {
+   void drawLights(sf::RenderTarget &target) {
         for (auto& light : lights) {
-            std::vector<Vector2<double>> endPoints = light->getEndPoints();
-
-            // Draw each ray as a line
-            for (const auto& endPoint : endPoints) {
-                sf::VertexArray line(sf::PrimitiveType::Lines, 2);
-                line[0].position = sf::Vector2f(light->getPosition().toSF_Vectorf().x, light->getPosition().toSF_Vectorf().y);
-                line[0].color = sf::Color::White; // Start point color
-
-                line[1].position = sf::Vector2f(endPoint.toSF_Vectorf().x, endPoint.toSF_Vectorf().y);
-                line[1].color = sf::Color::White; // End point color
-
-                target.draw(line);
-            }
+            light->drawDebug(target, shader_);
         }
-    }
-
+   }
 };

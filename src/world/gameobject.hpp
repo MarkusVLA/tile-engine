@@ -22,7 +22,7 @@ class GameObject {
 
 protected:
 
-    sf::Texture texture_;
+    sf::Texture &texture_; // Reference to texture
     sf::Sprite sprite_;
     std::string id_;
     Vector2<double> pos_;
@@ -31,8 +31,7 @@ protected:
 
 public:
 
-    GameObject();
-    GameObject(Vector2<double> pos, sf::Texture texture);
+    GameObject(Vector2<double> pos, sf::Texture &texture);
     ~GameObject();
 
     double getX() const;
@@ -50,15 +49,11 @@ public:
     std::ostream friend &operator<<(std::ostream &os, GameObject &object); // Print Game object info
 
 };
-GameObject::GameObject(): pos_(Vector2<double>()), sprite_(sf::Sprite(texture_)) {
-    texture_.loadFromFile("assets/default.png");
-    size_ = Vector2<double>(texture_.getSize().x, texture_.getSize().y);
-    rect_ = Rect<double>(pos_, size_);
-}
 
-GameObject::GameObject(Vector2<double> pos, sf::Texture texture): pos_(pos), texture_(texture), sprite_(sf::Sprite(texture)), id_("object id") {
+GameObject::GameObject(Vector2<double> pos, sf::Texture &texture): pos_(pos), texture_(texture), sprite_(texture), id_("object id") {
     size_ = Vector2<double>(texture_.getSize().x, texture_.getSize().y);
-    rect_ = Rect<double>(pos_, size_);
+    rect_ = Rect<double>(pos_, pos_ + size_);
+    updateSpritePos();
 }
 
 GameObject::~GameObject() { }
@@ -68,8 +63,21 @@ double GameObject::getY() const { return pos_.GetY(); }
 
 Rect<double> GameObject::getRect(void) const { return rect_; }
 
-bool GameObject::setX(double x) { pos_.SetX(x); return true;}
-bool GameObject::setY(double y) { pos_.SetY(y); return true;}
+bool GameObject::setX(double x) { 
+    pos_.SetX(x);
+    // Update rect
+    rect_.SetCornerA(pos_);
+    rect_.SetCornerB(pos_ + size_);
+    return true;
+}
+bool GameObject::setY(double y) {
+    pos_.SetY(y);
+    // Update rect
+    rect_.SetCornerA(pos_);
+    rect_.SetCornerB(pos_ + size_);
+    return true;
+
+}
 
 void GameObject::updateSpritePos(){ sprite_.setPosition(sf::Vector2f(static_cast<float>(pos_.GetX()), static_cast<float>(pos_.GetY()))); }
 

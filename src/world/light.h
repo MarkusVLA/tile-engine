@@ -61,31 +61,16 @@ public:
     
 
 
-    void drawDebug(sf::RenderWindow& window) {
-        for (const auto &endPoint : endPoints) {
-            sf::Vertex line[] = {
-                sf::Vertex(sf::Vector2f(static_cast<float>(position.GetX()), static_cast<float>(position.GetY())), sf::Color::Yellow),
-                sf::Vertex(sf::Vector2f(static_cast<float>(endPoint.GetX()), static_cast<float>(endPoint.GetY())), sf::Color::Yellow)
-            };
-            
-            window.draw(line, 2, sf::PrimitiveType::Lines);
-        }
+void drawDebug(sf::RenderTarget& target, sf::Shader& shader) {
+    for (const auto &endPoint : endPoints) {
+        sf::Vertex line[] = {
+            sf::Vertex(sf::Vector2f(static_cast<float>(position.GetX()), static_cast<float>(position.GetY())), sf::Color::Yellow),
+            sf::Vertex(sf::Vector2f(static_cast<float>(endPoint.GetX()), static_cast<float>(endPoint.GetY())), sf::Color::Yellow)
+        };
+        
+        target.draw(line, 2, sf::PrimitiveType::Lines, &shader);
     }
-
-
-    std::vector<sf::Vertex> getLightVerticies() {
-        std::vector<sf::Vertex> raysVertices;
-        raysVertices.reserve(numRays * 2); 
-
-        sf::Vertex startVertex(sf::Vector2f(static_cast<float>(position.GetX()), static_cast<float>(position.GetY())), sf::Color::Yellow);
-        for (const auto &endPoint : endPoints) {
-            sf::Vertex endVertex(sf::Vector2f(static_cast<float>(endPoint.GetX()), static_cast<float>(endPoint.GetY())), sf::Color::Yellow);
-
-            raysVertices.push_back(startVertex);
-            raysVertices.push_back(endVertex);
-        }
-        return raysVertices;
-    }
+}
 
 
 
