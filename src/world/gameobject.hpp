@@ -15,8 +15,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <ostream>
-#include "utils/vec.h"
-#include "utils/rect.h"
+#include "../utils/vec.h"
+#include "../utils/rect.h"
 
 class GameObject {
 
@@ -44,7 +44,7 @@ public:
 
     void updateSpritePos(void);
 
-    void GameObject::draw(sf::RenderTarget &target); // Draw game object on a surface
+    void draw(sf::RenderTarget &target); // Draw game object on a surface
 
     std::ostream friend &operator<<(std::ostream &os, GameObject &object); // Print Game object info
 

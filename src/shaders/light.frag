@@ -1,8 +1,7 @@
 // Fragment Shader
-#version 330 core
+#version 120
 
-out vec4 FragColor;
-in vec2 TexCoord;
+varying vec2 TexCoord;
 
 uniform vec2 lightPos; // Light position in SFML coordinates
 uniform vec2 renderTargetRes;
@@ -17,9 +16,9 @@ void main() {
     float distance = length(uv - light);
 
     float gradientWidth = 0.3;
-    float alpha = 1.0 - smoothstep(0.0, gradientWidth, distance);
+    float t = clamp((distance - 0.0) / (gradientWidth - 0.0), 0.0, 1.0);
+    float alpha = 1.0 - t * t * (3.0 - 2.0 * t); // Manual implementation of smoothstep
 
-    
     vec3 lightColor = vec3(1.0, 1.0, 0.5); // White light
-    FragColor = vec4(lightColor, alpha);
+    gl_FragColor = vec4(lightColor, alpha);
 }

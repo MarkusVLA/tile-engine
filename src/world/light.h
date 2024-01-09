@@ -75,7 +75,7 @@ public:
     }
 
     void fillArea(sf::RenderTarget& target, sf::Shader &shader){
-        std::sort(raySegments_.begin(), raySegments_.end(), segmentComparator);
+       // std::sort(raySegments_.begin(), raySegments_.end(), segmentComparator);
 
         
         // uniform vec2 lightPos; // Light position in SFML coordinates

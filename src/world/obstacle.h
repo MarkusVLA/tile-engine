@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "utils/vec.h"
+#include "../utils/vec.h"
 
 class Obstacle {
 private:

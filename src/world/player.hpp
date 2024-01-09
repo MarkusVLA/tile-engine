@@ -13,7 +13,7 @@ class Player: public GameObject {
 
 public:
     Player(Vector2<double> pos, sf::Texture &texture): GameObject(pos, texture) { }
-    Player::~Player() { }
+    ~Player() { }
 
 
     bool checkCollisionWithMap(Map& gameMap) {

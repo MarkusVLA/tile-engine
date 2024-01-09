@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vec.h"
-#include "..\world\obstacle.h"
+#include "../world/obstacle.h"
 
 #include <limits>
 #include <vector>

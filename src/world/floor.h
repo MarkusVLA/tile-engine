@@ -4,8 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include "gameobject.hpp"
 #include "tile.hpp"
-#include "utils/vec.h"
-#include "utils/rect.h"
+#include "../utils/vec.h"
+#include "../utils/rect.h"
 
 
 class Floor : public GameObject {
@@ -31,7 +31,7 @@ public:
     }
 
 
-    void Floor::updateVisibleTiles(const sf::View& cameraView) {
+    void updateVisibleTiles(const sf::View& cameraView) {
         // Calculate the bounds of the visible world area
         sf::Vector2f center = cameraView.getCenter();
         sf::Vector2f size = cameraView.getSize();

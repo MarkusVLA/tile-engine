@@ -1,8 +1,8 @@
 
 #pragma once
 #include "gameobject.hpp"
-#include "utils/vec.h"
-#include "utils/rect.h"
+#include "../utils/vec.h"
+#include "../utils/rect.h"
 #include "obstacle.h"
 
 

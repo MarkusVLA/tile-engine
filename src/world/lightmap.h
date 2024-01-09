@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include "Light.h"
+#include "light.h"
 #include <vector>
 #include <stdexcept>
 #include "../utils/rect.h"
