@@ -1,5 +1,8 @@
-# Tile based game engine using SFML library
+# Tile-engine
 
+SFML based tile engine with support for dynamic ray casted lights
+
+![Screenshot of Game Engine](screenshots/screenshot1.png)
 
 ## Usage Instructions
 
