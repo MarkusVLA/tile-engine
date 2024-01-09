@@ -18,12 +18,12 @@
 class Camera {
 private:
     sf::View view_;
-    sf::RenderWindow* window_;  // Pointer to the window where the view is applied
+    sf::Vector2f targetPosition_;  
+    float smoothingFactor_;        
 
 public:
 
-    Camera(sf::RenderWindow* window, const sf::FloatRect& viewRect);
-    ~Camera();
+    Camera(const sf::FloatRect& viewRect): view_(viewRect), smoothingFactor_(0.075f) {}
 
     // Getters
     sf::View getView() const { return view_; }
@@ -34,18 +34,23 @@ public:
     void move(const sf::Vector2f& delta);
     void zoom(float factor);
     void rotate(sf::Angle angle);
-    void setPosition(const sf::Vector2f& position);
     void setSize(const sf::Vector2f& size);
+
+
+    void update() {
+        // Interpolate between the current position and the target position
+        sf::Vector2f currentPosition = view_.getCenter();
+        sf::Vector2f newPosition = currentPosition + smoothingFactor_ * (targetPosition_ - currentPosition);
+        view_.setCenter(newPosition);
+    }
+
+    void setPosition(const sf::Vector2f& position) {
+        targetPosition_ = position;  // Set the target position
+        update();                    // Update the view (position
+    }
+    
 };
 
-
-
-
-Camera::Camera(sf::RenderWindow* window, const sf::FloatRect& viewRect)
-    : window_(window), view_(viewRect) {
-}
-
-Camera::~Camera() { }
 
 void Camera::move(const sf::Vector2f& delta) {
     view_.move(delta);
@@ -57,10 +62,6 @@ void Camera::zoom(float factor) {
 
 void Camera::rotate(sf::Angle angle) {
     view_.rotate(angle);
-}
-
-void Camera::setPosition(const sf::Vector2f& position) {
-    view_.setCenter(position);
 }
 
 void Camera::setSize(const sf::Vector2f& size) {

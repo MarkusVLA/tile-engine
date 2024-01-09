@@ -39,7 +39,7 @@ int main() {
 
     // Camera setup
     sf::Rect<float> viewRect(sf::Vector2f(0,0), sf::Vector2f(static_cast<float>(windowSize.x), static_cast<float>(windowSize.y)));
-    Camera camera(&window, viewRect);
+    Camera camera(viewRect);
 
     // Player setup
     sf::Texture playerTexture;
