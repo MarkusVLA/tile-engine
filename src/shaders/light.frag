@@ -4,21 +4,25 @@
 varying vec2 TexCoord;
 
 uniform vec2 lightPos; // Light position in SFML coordinates
+uniform vec2 cameraPos; // Position of view.
 uniform vec2 renderTargetRes;
+
 
 void main() {
 
-    // Convert fragment position and light position to normalized space
     vec2 uv = gl_FragCoord.xy / renderTargetRes;
-    vec2 light = (lightPos / renderTargetRes / 1000000) + 0.5;
-    light.y = 1.0 - light.y; 
+    // Convert SFML coordinates to OpenGL
+    vec2 screepos = (cameraPos + renderTargetRes - lightPos) / renderTargetRes;
+    // vec2 light = vec2(0.5);
+    vec2 light = screepos - vec2(0.5);
 
+    light.x = 1.0 - light.x; 
     float distance = length(uv - light);
 
-    float gradientWidth = 0.3;
+    float gradientWidth = 0.4;
     float t = clamp((distance - 0.0) / (gradientWidth - 0.0), 0.0, 1.0);
-    float alpha = 1.0 - t * t * (3.0 - 2.0 * t); // Manual implementation of smoothstep
+    float alpha = 1.0 - t * t * (3.0 - 2.0 * t); 
 
-    vec3 lightColor = vec3(1.0, 1.0, 0.5); // White light
+    vec3 lightColor = vec3(1.0, 1.0, 0.8); // Color
     gl_FragColor = vec4(lightColor, alpha);
 }

@@ -45,8 +45,12 @@ public:
     }
 
     void setPosition(const sf::Vector2f& position) {
-        targetPosition_ = position;  // Set the target position
-        update();                    // Update the view (position
+        targetPosition_ = position;  
+        update();                    
+    }
+
+    sf::Vector2f getTargetPos(void) const {
+        return targetPosition_;
     }
     
 };

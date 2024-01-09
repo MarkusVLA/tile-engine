@@ -5,6 +5,7 @@
 #include "../utils/obstacle_manager.h" 
 #include "../utils/ray.h"
 #include "../utils/segment.h"
+#include "../camera.hpp"
 #include <vector>
 #include <cmath>
 #include <algorithm>
@@ -74,14 +75,18 @@ public:
         }
     }
 
-    void fillArea(sf::RenderTarget& target, sf::Shader &shader){
-       // std::sort(raySegments_.begin(), raySegments_.end(), segmentComparator);
-
+    void fillArea(sf::RenderTarget& target, sf::Shader &shader, Camera &cam){
+        // std::sort(raySegments_.begin(), raySegments_.end(), segmentComparator);
+        // float LightRelativeToCenterX = position.GetX() - target.getSize().x / 2.0f;
+        // float LightRelativeToCenterY = position.GetY() - target.getSize().y / 2.0f;
         
         // uniform vec2 lightPos; // Light position in SFML coordinates
         // uniform vec2 renderTargetRes; // The resolution of the render target
+        // shader.setUniform("lightPos", sf::Vector2f({LightRelativeToCenterX, LightRelativeToCenterY}));
         shader.setUniform("lightPos", position.toSF_Vectorf());
         shader.setUniform("renderTargetRes", sf::Vector2f({static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)}));
+        shader.setUniform("cameraPos", cam.getPosition());
+        
         for (int i = 0; i < raySegments_.size(); i++){
             const auto& seg = raySegments_[i];
             sf::ConvexShape Tria(3);

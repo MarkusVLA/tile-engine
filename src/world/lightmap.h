@@ -50,10 +50,10 @@ public:
         renderTexture_.create({size.x, size.y});
     }
 
-   void drawLights(sf::RenderTarget &target) {
+   void drawLights(sf::RenderTarget &target, Camera cam) {
         for (auto& light : lights) {
             //light->drawDebug(target, shader_);
-            light->fillArea(target, shader_);
+            light->fillArea(target, shader_, cam);
         }
    }
 };

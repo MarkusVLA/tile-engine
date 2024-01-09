@@ -70,7 +70,7 @@ int main() {
 
     sf::Vector2u windowSize = {1600, 900};
     sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
-    sf::Vector2u renderTextureSize = {400, 300};
+    sf::Vector2u renderTextureSize = {1600, 900};
 
     // Create render textures for different layers with the smaller size
     sf::RenderTexture renderTextureMap;
@@ -96,7 +96,7 @@ int main() {
     Map gameMap;
     setUpMap(gameMap);
     
-    Player player(Vector2<double>(200,200), textures["default"]);
+    Player player(Vector2<double>(), textures["default"]);
     obstacle_manager.buildObstacleMap(gameMap);
 
 
@@ -105,10 +105,18 @@ int main() {
 
 
     Light light(Vector2<double>(player.getX(), player.getY()));
-    Light light2(Vector2<double>(100, 100));
+    Light light2(Vector2<double>(200, 200));
     LightMap light_map(window);
     light_map.addLight(&light);
     light_map.addLight(&light2);
+
+
+    // Render text
+    sf::Font font;
+    if (!font.loadFromFile("../src/assets/fonts/tuffy.ttf"))
+        return EXIT_FAILURE;
+    sf::Text text(font, "Time Step", 20);
+
 
 
     // Main game loop
@@ -119,6 +127,15 @@ int main() {
                 window.close();
             }
         }
+
+        sf::Vector2i mousePosWindow = sf::Mouse::getPosition(window);
+
+        Vector2<double> mousePosGame = Vector2<double>(
+            (static_cast<double>(mousePosWindow.x) * renderTextureSize.x) / windowSize.x - renderTextureSize.x / 2.0 + camera.getPosition().x,
+            (static_cast<double>(mousePosWindow.y) * renderTextureSize.y) / windowSize.y - renderTextureSize.y / 2.0 + camera.getPosition().y
+        );
+
+
 
         // Calculate potential new position
         double potentialX = player.getX() + (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ? -movementSpeed : (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ? movementSpeed : 0.0f));
@@ -137,6 +154,7 @@ int main() {
 
         // Update light position to track the player
         light.setPosition(Vector2<double>(player.getX(), player.getY()));
+        light2.setPosition(mousePosGame); // Second light tracks mouse.
         light_map.castRays(obstacle_manager); 
     
 
@@ -159,9 +177,9 @@ int main() {
         // Render the lighting to its texture
 
       
-        renderTextureLight.clear(sf::Color(30, 30, 30));
+        renderTextureLight.clear(sf::Color(20, 20, 30));
         light_map.updateCameraView(Vector2<double>(player.getX(), player.getY()));
-        light_map.drawLights(renderTextureLight);
+        light_map.drawLights(renderTextureLight, camera);
         renderTextureLight.display();
        
 
@@ -181,8 +199,14 @@ int main() {
             static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
         );
 
-        window.draw(lightSprite, sf::BlendMultiply); // Draw the scaled lighting with blending
+        // Debug text
+        text.setString(
+            "Player: " + std::to_string(player.getX()) + ", " + std::to_string(player.getY()) 
+            + "\nMouse" + std::to_string(mousePosGame.GetX()) + ", " + std::to_string(mousePosGame.GetY())
+        );
 
+        window.draw(lightSprite, sf::BlendMultiply); // Draw the scaled lighting with blending
+        window.draw(text, sf::BlendAdd);
         window.display();
     }
 
