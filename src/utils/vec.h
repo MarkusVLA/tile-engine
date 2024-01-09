@@ -97,6 +97,11 @@ public:
         return Vector2(this->x_ * scalar, this->y_ * scalar);
     }
 
+    double getAngle() {
+        return std::atan2(static_cast<double>(this->y_), static_cast<double>(this->x_));
+    }
+
+
     // Scalar division
     Vector2 operator/(Type scalar) const {
         if (scalar != 0) {

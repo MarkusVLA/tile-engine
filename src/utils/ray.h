@@ -12,6 +12,7 @@ private:
     Vector2<double> direction;
 
 public:
+
     Ray(Vector2<double> start, float angle) : start(start) {
         direction = Vector2<double>(cos(angle), sin(angle));
     }
@@ -46,8 +47,8 @@ private:
 
         double denominator = direction.cross(obstacleDirection);
 
-        if (abs(denominator) < 1e-6) {
-            return Vector2<double>(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        if (abs(denominator) < 1e-9) {
+            return Vector2<double>(std::numeric_limits<float>::max(), std::numeric_limits<float>::infinity());
         }
 
         Vector2<double> diffStart = obstacleStart - start;
@@ -60,6 +61,6 @@ private:
         }
 
         // No valid intersection
-        return Vector2<double>(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        return Vector2<double>(std::numeric_limits<float>::max(), std::numeric_limits<float>::infinity());
     }
 };

@@ -46,7 +46,8 @@ public:
 
    void drawLights(sf::RenderTarget &target) {
         for (auto& light : lights) {
-            light->drawDebug(target, shader_);
+            //light->drawDebug(target, shader_);
+            light->fillArea(target, shader_);
         }
    }
 };
