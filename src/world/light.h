@@ -76,6 +76,12 @@ public:
 
     void fillArea(sf::RenderTarget& target, sf::Shader &shader){
         std::sort(raySegments_.begin(), raySegments_.end(), segmentComparator);
+
+        
+        // uniform vec2 lightPos; // Light position in SFML coordinates
+        // uniform vec2 renderTargetRes; // The resolution of the render target
+        shader.setUniform("lightPos", position.toSF_Vectorf());
+        shader.setUniform("renderTargetRes", sf::Vector2f({static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)}));
         for (int i = 0; i < raySegments_.size(); i++){
             const auto& seg = raySegments_[i];
             sf::ConvexShape Tria(3);

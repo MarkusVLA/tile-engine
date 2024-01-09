@@ -45,7 +45,7 @@ void loadTextures() {
 }
 
 void setUpMap(Map &gameMap) {
-    int roomSize = 32; // Change this to the size of your room
+    int roomSize = 20; // Change this to the size of your room
     unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count(); // Use current time as seed
 
     // Create the room
@@ -105,8 +105,10 @@ int main() {
 
 
     Light light(Vector2<double>(player.getX(), player.getY()));
-    LightMap light_map(window); // Create a LightMap instance
-    light_map.addLight(&light); // Add the light to the LightMap
+    Light light2(Vector2<double>(100, 100));
+    LightMap light_map(window);
+    light_map.addLight(&light);
+    light_map.addLight(&light2);
 
 
     // Main game loop
@@ -135,7 +137,8 @@ int main() {
 
         // Update light position to track the player
         light.setPosition(Vector2<double>(player.getX(), player.getY()));
-        light.castRays(obstacle_manager);
+        light_map.castRays(obstacle_manager); 
+    
 
         // Update camera position
         camera.setPosition(sf::Vector2f(static_cast<float>(player.getX()), static_cast<float>(player.getY())));

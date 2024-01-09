@@ -36,6 +36,12 @@ public:
         renderTexture_.setView(cameraView); // Apply the updated view to the render texture
     }
 
+    void castRays(ObstacleManager man){
+        for (auto light: lights){
+            light->castRays(man);
+        }
+    }
+
     void addLight(Light* light) {
         lights.push_back(light);
     }
