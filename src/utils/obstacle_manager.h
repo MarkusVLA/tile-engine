@@ -30,9 +30,9 @@ public:
         return obstacles;
     }
 
-    void draw(sf::RenderWindow& window) {
+    void draw(sf::RenderTarget &target) {
         for (auto obstacle : obstacles) {
-            obstacle.draw(window);
+            obstacle.draw(target);
         }
     }
 };

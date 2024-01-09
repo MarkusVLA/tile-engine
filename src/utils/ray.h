@@ -18,11 +18,11 @@ public:
 
     Vector2<double> cast(const std::vector<Obstacle>& obstacles) {
         Vector2<double> closestPoint;
-        float minDist = std::numeric_limits<float>::infinity();
+        double minDist = std::numeric_limits<double>::max();
 
         for (const auto& obstacle : obstacles) {
             Vector2<double> point = intersect(obstacle);
-            float dist = start.distanceTo(point);
+            double dist = start.distanceTo(point);
 
             if (dist < minDist) {
                 minDist = dist;
@@ -30,8 +30,8 @@ public:
             }
         }
 
-        if (minDist == std::numeric_limits<float>::infinity()) {
-            return start + direction * 1000.0f;
+        if (minDist == std::numeric_limits<double>::max()) {
+            return start + direction * 10000.0f;
         }
 
         return closestPoint;

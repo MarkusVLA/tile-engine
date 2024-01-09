@@ -25,13 +25,17 @@ public:
     Camera(sf::RenderWindow* window, const sf::FloatRect& viewRect);
     ~Camera();
 
+    // Getters
+    sf::View getView() const { return view_; }
+    sf::Vector2f getPosition() const { return view_.getCenter(); }
+    sf::Vector2f getSize() const { return view_.getSize(); }
+
     // Camera manipulation methods
     void move(const sf::Vector2f& delta);
     void zoom(float factor);
     void rotate(sf::Angle angle);
     void setPosition(const sf::Vector2f& position);
     void setSize(const sf::Vector2f& size);
-    void applyView() const;
 };
 
 
@@ -63,11 +67,6 @@ void Camera::setSize(const sf::Vector2f& size) {
     view_.setSize(size);
 }
 
-void Camera::applyView() const {
-    if (window_) {
-        window_->setView(view_);
-    }
-}
 
 
 

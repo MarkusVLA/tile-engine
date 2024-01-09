@@ -29,10 +29,10 @@ public:
         tiles_.push_back(tile);
     }
 
-    void draw(sf::RenderWindow &window) {
+    void draw(sf::RenderTarget &target) {
         // Draw all tiles to game window.
         for (auto tile : tiles_) {
-            tile.draw(window);
+            tile.draw(target);
         }
     }
 

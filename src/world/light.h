@@ -15,28 +15,21 @@ class Light {
 private:
     Vector2<double> position;
     int numRays;
+    double radius;
     std::vector<Vector2<double>> endPoints;  
     float angleIncrement;  
-    sf::Shader shader;
-    sf::RenderTexture lightRenderTexture;
-    bool textureInitialized = false;
-
 
 
 public:
     Light(Vector2<double> position): position(position), numRays(360) {
         angleIncrement = 360.0f / static_cast<float>(numRays);
-        
-        if (!shader.loadFromFile("../src/shaders/light.frag", sf::Shader::Fragment)) {
-            std::cout << "Error loading shader" << std::endl;
-        }
     }
     Light(Vector2<double> position, int numRays): position(position), numRays(numRays) {
         angleIncrement = 360.0f / static_cast<float>(numRays);
+    }
 
-        if (!shader.loadFromFile("../src/shaders/light.frag", sf::Shader::Fragment)) {
-            std::cout << "Error loading shader" << std::endl;
-        }
+    double getRadius() const {
+        return radius;
     }
 
 
@@ -65,59 +58,42 @@ public:
     const std::vector<Vector2<double>>& getEndPoints() const {
         return endPoints;
     }
+    
 
-     void draw(sf::RenderWindow& window) {
+
+    void drawDebug(sf::RenderWindow& window) {
+        for (const auto &endPoint : endPoints) {
+            sf::Vertex line[] = {
+                sf::Vertex(sf::Vector2f(static_cast<float>(position.GetX()), static_cast<float>(position.GetY())), sf::Color::Yellow),
+                sf::Vertex(sf::Vector2f(static_cast<float>(endPoint.GetX()), static_cast<float>(endPoint.GetY())), sf::Color::Yellow)
+            };
+            
+            window.draw(line, 2, sf::PrimitiveType::Lines);
+        }
+    }
+
+
+    std::vector<sf::Vertex> getLightVerticies() {
         std::vector<sf::Vertex> raysVertices;
-        raysVertices.reserve(numRays * 2);
+        raysVertices.reserve(numRays * 2); 
 
-        for (int i = 0; i < numRays; ++i) {
-
-            Vector2<double> endPoint = endPoints[i];
-
-            sf::Vertex startVertex(sf::Vector2f(static_cast<float>(position.GetX()), static_cast<float>(position.GetY())), sf::Color::Yellow);
+        sf::Vertex startVertex(sf::Vector2f(static_cast<float>(position.GetX()), static_cast<float>(position.GetY())), sf::Color::Yellow);
+        for (const auto &endPoint : endPoints) {
             sf::Vertex endVertex(sf::Vector2f(static_cast<float>(endPoint.GetX()), static_cast<float>(endPoint.GetY())), sf::Color::Yellow);
 
             raysVertices.push_back(startVertex);
             raysVertices.push_back(endVertex);
         }
-
-        window.draw(raysVertices.data(), raysVertices.size(), sf::PrimitiveType::Lines);
+        return raysVertices;
     }
 
-    void initializeRenderTexture(const sf::RenderWindow& window) {
-        if (!lightRenderTexture.create({window.getSize().x, window.getSize().y})) {
-            throw std::runtime_error("Failed to create render texture for light.");
-        }
-        textureInitialized = true;
+
+
+    friend std::ostream& operator<<(std::ostream& os, const Light& light) {
+        os << "Light: " << light.position << std::endl;
+        return os;
     }
-    
 
-    void drawFail(sf::RenderWindow& window) {
-        if (!textureInitialized) {
-            initializeRenderTexture(window);
-        }
-        
-
-        // Create light shape
-        sf::ConvexShape lightShape;
-        lightShape.setPointCount(endPoints.size());
-        for (size_t i = 0; i < endPoints.size(); ++i) {
-            lightShape.setPoint(i, sf::Vector2f(static_cast<float>(endPoints[i].GetX()), static_cast<float>(endPoints[i].GetY())));
-        }
-
-        // Set shader parameters
-        shader.setUniform("LightPos", sf::Vector2f(position.GetX(), window.getSize().y - position.GetY()));
-        shader.setUniform("LightIntensity", 0.7f);
-
-        // Draw light shape to render texture
-        lightRenderTexture.clear(sf::Color::Transparent);
-        lightRenderTexture.draw(lightShape, &shader);
-        lightRenderTexture.display();
-
-        // Draw render texture to window
-        sf::Sprite lightSprite(lightRenderTexture.getTexture());
-        window.draw(lightSprite);
-    }
 };
 
 

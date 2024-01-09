@@ -15,6 +15,7 @@ public:
     Player();
     Player(Vector2<double> pos, sf::Texture texture);
     ~Player();
+    
 };
 
 Player::Player(): GameObject(), playerRect_(sf::Vector2f(), PLAYERSIZE) { } // Default

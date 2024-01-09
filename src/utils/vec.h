@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <SFML/Graphics.hpp>
 
 template <typename Type>
 struct Vec2 {
@@ -112,6 +113,11 @@ public:
         Type dx = this->x_ - other.GetX();
         Type dy = this->y_ - other.GetY();
         return sqrt(dx * dx + dy * dy);
+    }
+
+
+    sf::Vector2f toSF_Vectorf() const {
+        return sf::Vector2f(static_cast<float>(this->x_), static_cast<float>(this->y_));
     }
 
     // Output stream overload

@@ -4,7 +4,6 @@
 #include <cmath>
 #include "vec.h"
 
-
 template <typename Type>
 
 class Rect {

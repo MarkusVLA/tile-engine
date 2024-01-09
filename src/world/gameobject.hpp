@@ -45,7 +45,7 @@ public:
 
     void updateSpritePos(void);
 
-    void draw(sf::RenderWindow &window); // Draw game object on a surface
+    void GameObject::draw(sf::RenderTarget &target); // Draw game object on a surface
 
     std::ostream friend &operator<<(std::ostream &os, GameObject &object); // Print Game object info
 
@@ -73,10 +73,10 @@ bool GameObject::setY(double y) { pos_.SetY(y); return true;}
 
 void GameObject::updateSpritePos(){ sprite_.setPosition(sf::Vector2f(static_cast<float>(pos_.GetX()), static_cast<float>(pos_.GetY()))); }
 
-void GameObject::draw(sf::RenderWindow &window) {
-    // draw as a rectangle form 
-    window.draw(sprite_); 
+void GameObject::draw(sf::RenderTarget &target) {
+    target.draw(sprite_);
 }
+
 
 std::ostream& operator<<(std::ostream &os, GameObject &object) {
     os << "GameObject: " << object.id_ << "(" << object.pos_.GetX() << ", " << object.pos_.GetY() << ")" << std::endl;
