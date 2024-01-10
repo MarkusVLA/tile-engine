@@ -15,6 +15,7 @@
 #include "world/floor.h"
 #include "utils/rand.h"
 #include "world/bullet.h"
+#include "utils/post_processing.h"
 #include <memory>
 #include <map>
 
@@ -117,6 +118,9 @@ int main() {
     std::vector<std::shared_ptr<Bullet>> bullets;
     volatile int shootCoolDonwn = 0;
 
+    Transforms::PerspectiveShader perspectiveShader;
+    Transforms::LightPerspectiveShader lightLayerShader;
+
     // Main game loop
     while (window.isOpen()) {
         sf::Event event;
@@ -200,7 +204,7 @@ int main() {
         // Render the lighting to its texture
 
       
-        renderTextureLight.clear(sf::Color(30, 30, 40));
+        renderTextureLight.clear(sf::Color(20, 20, 20));
         light_map->updateCameraView(Vector2<double>(player.getX(), player.getY()));
         light_map->drawLights(renderTextureLight, camera);
         renderTextureLight.display();
@@ -209,11 +213,21 @@ int main() {
         window.clear();
 
         sf::Sprite mapSprite(renderTextureMap.getTexture());
+
         mapSprite.setScale(
             {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
             static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
         );
-        window.draw(mapSprite); // Draw the scaled game map
+
+        // window.draw(mapSprite); // Draw the scaled game map
+
+
+        perspectiveShader.apply(mapSprite, sf::Vector2f(windowSize));
+        lightLayerShader.apply(mapSprite, sf::Vector2f(windowSize));
+
+
+
+        window.draw(mapSprite, &perspectiveShader.getShader());
 
         
         sf::Sprite lightSprite(renderTextureLight.getTexture());
@@ -229,7 +243,9 @@ int main() {
             +"\nBullets: " + std::to_string(bullets.size())
         );
 
-        window.draw(lightSprite, sf::BlendMultiply); // Draw the scaled lighting with blending
+        // window.draw(lightSprite, sf::BlendMultiply); // Draw the scaled lighting with blending
+        window.draw(lightSprite, sf::RenderStates(sf::BlendMultiply, sf::Transform(), nullptr, &lightLayerShader.getShader()));
+
         window.draw(text, sf::BlendAdd);
         window.display();
     }
