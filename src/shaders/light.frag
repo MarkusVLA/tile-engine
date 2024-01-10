@@ -11,9 +11,9 @@ uniform float gradientWidth;
 
 void main() {
 
-    vec2 uv = gl_FragCoord.xy / renderTargetRes;
+    vec2 uv = gl_FragCoord.xy / renderTargetRes.xy;
     // Convert SFML coordinates to OpenGL
-    vec2 screepos = (cameraPos + renderTargetRes - lightPos) / renderTargetRes;
+    vec2 screepos = ((cameraPos + renderTargetRes) - lightPos) / renderTargetRes;
     vec2 light = screepos - vec2(0.5);
 
     light.x = 1.0 - light.x; 

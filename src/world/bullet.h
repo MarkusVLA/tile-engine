@@ -21,12 +21,19 @@ private:
     Vector2<double> direction_;
     Light bulletLight_;
     std::shared_ptr<LightMap> lMap_;
+    sf::Shader shader_;
 
 public:
     Bullet(Vector2<double> pos, sf::Texture& texture, Vector2<double> dir, std::shared_ptr<LightMap> lmap)
-        : GameObject(pos, texture), speed_(800), lifetime_(60), direction_(dir.Normalize()), lMap_(lmap) {
+        : GameObject(pos, texture), speed_(600), lifetime_(60), direction_(dir.Normalize()), lMap_(lmap) {
             bulletLight_ = Light(pos, 100, {1.0, 0.6, 0.4}, 0.3);
             lMap_->addLight(&bulletLight_); // Access LightMap through shared_ptr
+
+            if (!shader_.loadFromFile("../src/shaders/bullet.frag", sf::Shader::Fragment)) {
+                throw std::runtime_error("Failed to load bullet shader.");
+            }
+
+            
             std::cout << "Created new bullet " <<  this  << " at: " << pos_ << std::endl;
     }
     
@@ -67,17 +74,15 @@ public:
         return false;
     }
 
-    
-    void draw(sf::RenderTarget &target) {
-        double lineLength = 10.0; // You can adjust this value
-        Vector2<double> endPoint = pos_ + direction_ * lineLength;
-        sf::Vertex line[] = {
-            sf::Vertex(sf::Vector2f(pos_.GetX(), pos_.GetY())),
-            sf::Vertex(sf::Vector2f(endPoint.GetX(), endPoint.GetY()))
-        };
-        line[0].color = sf::Color::White;
-        line[1].color = sf::Color::Red;
-        target.draw(line, 2, sf::PrimitiveType::Lines);
-    }   
-
+    void draw(sf::RenderTarget &target, sf::Vector2f camPos) {
+        shader_.setUniform("bulletPos", sf::Vector2f(pos_.GetX(), pos_.GetY()));
+        shader_.setUniform("cameraPos", camPos);
+        shader_.setUniform("renderTargetRes", sf::Vector2f(target.getSize().x, target.getSize().y));
+        shader_.setUniform("bulletDirection", direction_.toSF_Vectorf());
+        shader_.setUniform("bulletTexture", texture_);
+        sf::CircleShape bulletSurface(30); 
+        bulletSurface.setOrigin({30, 30}); 
+        bulletSurface.setPosition(pos_.toSF_Vectorf());
+        target.draw(bulletSurface, &shader_);
+    }
 };

@@ -21,7 +21,7 @@
 
 #define TILESIZE 64
 #define FLOORSIZE 256
-#define FPS 60
+#define FPS 80
 
 // Global texture storage
 std::map<std::string, sf::Texture> textures;
@@ -67,9 +67,9 @@ void updateRenderTextureView(sf::RenderTexture& renderTexture, const Camera& cam
 int main() {
 
 
-    sf::Vector2u windowSize = {1024, 1024};
+    sf::Vector2u windowSize = {1000, 1000};
     sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
-    sf::Vector2u renderTextureSize = {512, 512}; // Size to scale up
+    sf::Vector2u renderTextureSize = {500, 500}; // Size to scale up
 
     // Create render textures for different layers with the smaller size
     sf::RenderTexture renderTextureMap;
@@ -187,7 +187,7 @@ int main() {
         // Update and draw bullets
         for (auto it = bullets.begin(); it != bullets.end(); ) {
             (*it)->update(1.0 / FPS);
-            (*it)->draw(renderTextureMap);
+            (*it)->draw(renderTextureMap, camera.getPosition());
 
             if ((*it)->shouldDestroy(gameMap)) {
                 it = bullets.erase(it); // Erase the bullet and move to the next
@@ -204,7 +204,7 @@ int main() {
         // Render the lighting to its texture
 
       
-        renderTextureLight.clear(sf::Color(20, 20, 20));
+        renderTextureLight.clear(sf::Color(12, 12, 12));
         light_map->updateCameraView(Vector2<double>(player.getX(), player.getY()));
         light_map->drawLights(renderTextureLight, camera);
         renderTextureLight.display();
