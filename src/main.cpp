@@ -26,23 +26,19 @@
 std::map<std::string, sf::Texture> textures;
 
 void loadTextures() {
-    if (!textures["tile"].loadFromFile("../src/assets/tile.png")) {
+    if (!textures["tile"].loadFromFile("../src/assets/textures/tile.png")) {
         std::cerr << "Failed to load tile texture" << std::endl;
     }
-    if (!textures["default"].loadFromFile("../src/assets/default.png")) {
+    if (!textures["default"].loadFromFile("../src/assets/textures/default.png")) {
         std::cerr << "Failed to load default texture" << std::endl;
     }
 
-    if (!textures["floor1"].loadFromFile("../src/assets/floor1.png")) {
-        std::cerr << "Failed to load light texture" << std::endl;
+    if (!textures["sheet"].loadFromFile("../src/assets/textures/sheet.png")) {
+        std::cerr << "Failed to load default texture" << std::endl;
     }
 
-    if (!textures["floor2"].loadFromFile("../src/assets/floor2.png")) {
-        std::cerr << "Failed to load light texture" << std::endl;
-    }
-
-    if (!textures["floor3"].loadFromFile("../src/assets/floor3.png")) {
-        std::cerr << "Failed to load light texture" << std::endl;
+    if (!textures["floor"].loadFromFile("../src/assets/textures/floor.png")) {
+        std::cerr << "Failed to load floor texture" << std::endl;
     }
 }
 
@@ -72,7 +68,7 @@ int main() {
 
     sf::Vector2u windowSize = {1024, 1024};
     sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
-    sf::Vector2u renderTextureSize = {1024, 1024}; // Size to scale up
+    sf::Vector2u renderTextureSize = {512, 512}; // Size to scale up
 
     // Create render textures for different layers with the smaller size
     sf::RenderTexture renderTextureMap;
@@ -91,7 +87,7 @@ int main() {
     // Obstacle setup
     ObstacleManager obstacle_manager;
     // Map setup
-    const float movementSpeed = 5.0f;
+    const float movementSpeed = 2.0f;
     Map gameMap;
     setUpMap(gameMap);
     
@@ -100,14 +96,12 @@ int main() {
 
 
     // FLoor setup
-    Floor floor(textures["floor3"]);
+    Floor floor(textures["floor"]);
 
     // Light setup
-    Light light(Vector2<double>(player.getX(), player.getY()));
     Light light2(Vector2<double>(200, 100), 200, {1.0, 0.2, 0.7}, 0.6);
-    Light light3(Vector2<double>(300, 200), 200, {0.1, 1.0, 0.6}, 0.6);
+    Light light3(Vector2<double>(400, 300), 200, {0.1, 1.0, 0.6}, 0.6);
     std::shared_ptr<LightMap> light_map = std::make_shared<LightMap>(window);
-    light_map->addLight(&light);
     light_map->addLight(&light2);
     light_map->addLight(&light3);
 
@@ -168,9 +162,6 @@ int main() {
         
         player.updateSpritePos();
 
-        // Update light position to track the player
-        light.setPosition(Vector2<double>(player.getX(), player.getY()));
-
         light_map->castRays(obstacle_manager); 
 
 
@@ -194,7 +185,7 @@ int main() {
             (*it)->update(1.0 / FPS);
             (*it)->draw(renderTextureMap);
 
-            if ((*it)->shouldDestroy()) {
+            if ((*it)->shouldDestroy(gameMap)) {
                 it = bullets.erase(it); // Erase the bullet and move to the next
             } else {
                 ++it; // Only increment if not erasing
@@ -209,7 +200,7 @@ int main() {
         // Render the lighting to its texture
 
       
-        renderTextureLight.clear(sf::Color(0, 0, 0));
+        renderTextureLight.clear(sf::Color(30, 30, 40));
         light_map->updateCameraView(Vector2<double>(player.getX(), player.getY()));
         light_map->drawLights(renderTextureLight, camera);
         renderTextureLight.display();

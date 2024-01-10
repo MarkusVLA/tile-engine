@@ -31,9 +31,17 @@ std::vector<Obstacle> Tile::getObstacles(void){
     Vector2<double> cornerB = rect_.GetCornerB();
     Vector2<double> cornerC(cornerB.GetX(), cornerA.GetY());
     Vector2<double> cornerD(cornerA.GetX(), cornerB.GetY());
+
+    double extension = 16.0;
+
+    // Extend cornerB and cornerD further out by 'extension' units
+    Vector2<double> extendedCornerB(cornerB.GetX(), cornerB.GetY() - extension);
+    Vector2<double> extendedCornerD(cornerD.GetX(), cornerD.GetY() - extension);
+
     obstacles.push_back(Obstacle(cornerA, cornerC));
     obstacles.push_back(Obstacle(cornerC, cornerB));
-    obstacles.push_back(Obstacle(cornerB, cornerD));
+    obstacles.push_back(Obstacle(cornerB, cornerD)); // Use extended points
     obstacles.push_back(Obstacle(cornerD, cornerA));
+
     return obstacles;
 }

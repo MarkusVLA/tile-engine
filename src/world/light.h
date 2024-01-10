@@ -84,7 +84,6 @@ public:
         shader.setUniform("lightColor", color_);
         shader.setUniform("gradientWidth", gradientWidth_);
 
-        
         for (int i = 0; i < raySegments_.size(); i++){
             const auto& seg = raySegments_[i];
             sf::ConvexShape Tria(3);
@@ -99,7 +98,7 @@ public:
                 Tria.setPoint(2, sf::Vector2f(raySegments_[i + 1].GetEnd().GetX(), raySegments_[i + 1].GetEnd().GetY()));
             }
             Tria.setFillColor(sf::Color(255, 255, 255, 220));
-            target.draw(Tria, &shader);
+            target.draw(Tria, sf::RenderStates(sf::BlendAdd, sf::Transform(), nullptr, &shader));
         }
     }
 

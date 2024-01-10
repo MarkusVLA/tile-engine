@@ -15,8 +15,8 @@ private:
 
 public:
     // Constructor
-    Floor(sf::Texture &texture, int width = 100000, int height = 100000)
-        : GameObject(Vector2<double>(0, 0), texture), tileSize(512 + 256) {
+    Floor(sf::Texture &texture, int width = 10000, int height = 10000)
+        : GameObject(Vector2<double>(0, 0), texture), tileSize(texture.getSize().x) {
         // Half of the width and height to generate tiles in all directions
         int halfWidth = width / 2;
         int halfHeight = height / 2;

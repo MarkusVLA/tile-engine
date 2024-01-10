@@ -18,6 +18,7 @@
 #include "../utils/vec.h"
 #include "../utils/rect.h"
 
+
 class GameObject {
 
 protected:
@@ -46,6 +47,7 @@ public:
     void updateSpritePos(void);
 
     void draw(sf::RenderTarget &target); // Draw game object on a surface
+    // bool checkCollisionWithMap(Map& gameMap);
 
     std::ostream friend &operator<<(std::ostream &os, GameObject &object); // Print Game object info
 
