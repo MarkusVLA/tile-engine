@@ -36,6 +36,7 @@ public:
 
     double getX() const;
     double getY() const;
+    Vector2<double> GetPos() { return Vector2<double>(this->getX(), this->getY()); }
 
     Rect<double> getRect(void) const;
 

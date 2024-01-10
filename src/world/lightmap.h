@@ -1,3 +1,6 @@
+
+#pragma once
+
 #include <SFML/Graphics.hpp>
 #include "light.h"
 #include <vector>
@@ -44,6 +47,13 @@ public:
 
     void addLight(Light* light) {
         lights.push_back(light);
+    }
+
+    void removeLight(Light* light) {
+        auto it = std::remove(lights.begin(), lights.end(), light);
+        if (it != lights.end()) {
+            lights.erase(it, lights.end());
+        }
     }
 
     void updateRenderTextureSize(const sf::Vector2u& size) {

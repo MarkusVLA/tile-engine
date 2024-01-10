@@ -21,13 +21,17 @@ private:
     double radius;
     std::vector<Segment<double>> raySegments_;  
     float angleIncrement;  
+    sf::Vector3f color_;
 
 
 public:
-    Light(Vector2<double> position): position(position), numRays(720) {
+
+    Light() {} // Default
+
+    Light(Vector2<double> position): position(position), numRays(720), color_({1.0, 1.0, 1.0}) {
         angleIncrement = 360.0f / static_cast<float>(numRays);
     }
-    Light(Vector2<double> position, int numRays): position(position), numRays(numRays) {
+    Light(Vector2<double> position, int numRays, sf::Vector3f color): position(position), numRays(numRays), color_(color) {
         angleIncrement = 360.0f / static_cast<float>(numRays);
     }
 
@@ -59,12 +63,8 @@ public:
         }
     }
 
-    const std::vector<Segment<double>>& getEndPoints() const {
-        return raySegments_;
-    }
+    const std::vector<Segment<double>>& getEndPoints() const { return raySegments_; }
     
-
-
     void drawDebugRays(sf::RenderTarget& target, sf::Shader& shader) {
         for (const auto &segment : raySegments_) {
             sf::Vertex line[] = {
@@ -76,16 +76,12 @@ public:
     }
 
     void fillArea(sf::RenderTarget& target, sf::Shader &shader, Camera &cam){
-        // std::sort(raySegments_.begin(), raySegments_.end(), segmentComparator);
-        // float LightRelativeToCenterX = position.GetX() - target.getSize().x / 2.0f;
-        // float LightRelativeToCenterY = position.GetY() - target.getSize().y / 2.0f;
-        
-        // uniform vec2 lightPos; // Light position in SFML coordinates
-        // uniform vec2 renderTargetRes; // The resolution of the render target
-        // shader.setUniform("lightPos", sf::Vector2f({LightRelativeToCenterX, LightRelativeToCenterY}));
+
         shader.setUniform("lightPos", position.toSF_Vectorf());
         shader.setUniform("renderTargetRes", sf::Vector2f({static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)}));
         shader.setUniform("cameraPos", cam.getPosition());
+        shader.setUniform("lightColor", color_);
+
         
         for (int i = 0; i < raySegments_.size(); i++){
             const auto& seg = raySegments_[i];

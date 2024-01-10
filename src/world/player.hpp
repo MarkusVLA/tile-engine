@@ -5,6 +5,7 @@
 #include "../utils/vec.h"
 #include "../utils/rect.h"
 #include "map.hpp"
+#include "bullet.h"
 
 #define PLAYERSIZE sf::Vector2f(16, 16)
 
@@ -15,6 +16,10 @@ public:
     Player(Vector2<double> pos, sf::Texture &texture): GameObject(pos, texture) { }
     ~Player() { }
 
+
+    std::shared_ptr<Bullet> shootBullet(Vector2<double> dir, std::shared_ptr<LightMap> lMap) {
+        return std::make_shared<Bullet>(pos_, texture_, dir, lMap);
+    }
 
     bool checkCollisionWithMap(Map& gameMap) {
         

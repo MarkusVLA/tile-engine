@@ -14,11 +14,13 @@
 #include "world/lightmap.h"
 #include "world/floor.h"
 #include "utils/rand.h"
+#include "world/bullet.h"
+#include <memory>
 #include <map>
 
 #define TILESIZE 64
 #define FLOORSIZE 256
-
+#define FPS 60
 
 // Global texture storage
 std::map<std::string, sf::Texture> textures;
@@ -45,8 +47,8 @@ void loadTextures() {
 }
 
 void setUpMap(Map &gameMap) {
-    int roomSize = 20; // Change this to the size of your room
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count(); // Use current time as seed
+    int roomSize = 20;
+    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
 
     // Create the room
     for (int y = 0; y < roomSize; y++) {
@@ -70,7 +72,7 @@ int main() {
 
     sf::Vector2u windowSize = {1600, 900};
     sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
-    sf::Vector2u renderTextureSize = {1600, 900};
+    sf::Vector2u renderTextureSize = {800, 450}; // Size to scale up
 
     // Create render textures for different layers with the smaller size
     sf::RenderTexture renderTextureMap;
@@ -78,10 +80,10 @@ int main() {
     sf::RenderTexture renderTextureLight;
     renderTextureLight.create({renderTextureSize.x, renderTextureSize.y});
 
-    window.setFramerateLimit(60); // Set frame rate limit
+    window.setFramerateLimit(FPS); // Set frame rate limit
 
     // Camera setup
-    sf::Rect<float> viewRect(sf::Vector2f(0,0), sf::Vector2f(static_cast<float>(windowSize.x), static_cast<float>(windowSize.y)));
+    sf::Rect<float> viewRect(sf::Vector2f(0,0), sf::Vector2f(static_cast<float>(renderTextureSize.x), static_cast<float>(renderTextureSize.y)));
     Camera camera(viewRect);
 
     loadTextures();
@@ -105,10 +107,10 @@ int main() {
 
 
     Light light(Vector2<double>(player.getX(), player.getY()));
-    Light light2(Vector2<double>(200, 200));
-    LightMap light_map(window);
-    light_map.addLight(&light);
-    light_map.addLight(&light2);
+    Light light2(Vector2<double>(800, 800), 200, {1.0, 0.2, 0.7});
+    std::shared_ptr<LightMap> light_map = std::make_shared<LightMap>(window);
+    light_map->addLight(&light);
+    light_map->addLight(&light2);
 
 
     // Render text
@@ -117,7 +119,9 @@ int main() {
         return EXIT_FAILURE;
     sf::Text text(font, "Time Step", 20);
 
+    // Bullets
 
+    std::vector<std::shared_ptr<Bullet>> bullets;
 
     // Main game loop
     while (window.isOpen()) {
@@ -144,8 +148,17 @@ int main() {
         // Check for collision at the potential new position
         bool colliding = player.checkCollisionWithMap(gameMap, potentialX, potentialY);
         
+
+
+        // BULLETS //
+        bool shooting = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+        if (shooting && bullets.size() < 1) {
+            Vector2<double> bulletDir = (mousePosGame - player.GetPos()).Normalize();
+            auto newBullet = player.shootBullet(bulletDir, light_map);
+            bullets.push_back(newBullet);
+        }
+
         if (!colliding) {
-            // Update player position only if not colliding
             player.setX(potentialX);
             player.setY(potentialY);
         }
@@ -154,9 +167,9 @@ int main() {
 
         // Update light position to track the player
         light.setPosition(Vector2<double>(player.getX(), player.getY()));
-        light2.setPosition(mousePosGame); // Second light tracks mouse.
-        light_map.castRays(obstacle_manager); 
-    
+
+        light_map->castRays(obstacle_manager); 
+
 
         // Update camera position
         camera.setPosition(sf::Vector2f(static_cast<float>(player.getX()), static_cast<float>(player.getY())));
@@ -167,19 +180,35 @@ int main() {
         updateRenderTextureView(renderTextureMap, camera);
         updateRenderTextureView(renderTextureLight, camera);
 
-        // Render the game map to its texture
+        // Game map rendering.
         renderTextureMap.clear();
         floor.draw(renderTextureMap);
         gameMap.draw(renderTextureMap);
         player.draw(renderTextureMap);
+
+        // Update and draw bullets
+        for (auto it = bullets.begin(); it != bullets.end(); ) {
+            (*it)->update(1.0 / FPS);
+            (*it)->draw(renderTextureMap);
+
+            if ((*it)->shouldDestroy()) {
+                it = bullets.erase(it); // Erase the bullet and move to the next
+            } else {
+                ++it; // Only increment if not erasing
+            }
+
+        }
+
+        //////////////////////////////////////////////////////
+        
         renderTextureMap.display();
 
         // Render the lighting to its texture
 
       
         renderTextureLight.clear(sf::Color(20, 20, 30));
-        light_map.updateCameraView(Vector2<double>(player.getX(), player.getY()));
-        light_map.drawLights(renderTextureLight, camera);
+        light_map->updateCameraView(Vector2<double>(player.getX(), player.getY()));
+        light_map->drawLights(renderTextureLight, camera);
         renderTextureLight.display();
        
 
@@ -202,7 +231,9 @@ int main() {
         // Debug text
         text.setString(
             "Player: " + std::to_string(player.getX()) + ", " + std::to_string(player.getY()) 
-            + "\nMouse" + std::to_string(mousePosGame.GetX()) + ", " + std::to_string(mousePosGame.GetY())
+            +"\nMouse" + std::to_string(mousePosGame.GetX()) + ", " + std::to_string(mousePosGame.GetY())
+            +"\nPressed: " + std::to_string(shooting)
+            +"\nBullets: " + std::to_string(bullets.size())
         );
 
         window.draw(lightSprite, sf::BlendMultiply); // Draw the scaled lighting with blending
