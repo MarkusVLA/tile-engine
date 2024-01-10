@@ -70,9 +70,9 @@ void updateRenderTextureView(sf::RenderTexture& renderTexture, const Camera& cam
 int main() {
 
 
-    sf::Vector2u windowSize = {1600, 900};
+    sf::Vector2u windowSize = {1024, 1024};
     sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
-    sf::Vector2u renderTextureSize = {800, 450}; // Size to scale up
+    sf::Vector2u renderTextureSize = {1024, 1024}; // Size to scale up
 
     // Create render textures for different layers with the smaller size
     sf::RenderTexture renderTextureMap;
@@ -90,9 +90,6 @@ int main() {
 
     // Obstacle setup
     ObstacleManager obstacle_manager;
-    Obstacle obstacle1(Vector2<double>(100, 100), Vector2<double>(200, 100));
-    obstacle_manager.addObstacle(obstacle1);
-
     // Map setup
     const float movementSpeed = 5.0f;
     Map gameMap;
@@ -105,12 +102,14 @@ int main() {
     // FLoor setup
     Floor floor(textures["floor3"]);
 
-
+    // Light setup
     Light light(Vector2<double>(player.getX(), player.getY()));
-    Light light2(Vector2<double>(800, 800), 200, {1.0, 0.2, 0.7});
+    Light light2(Vector2<double>(200, 100), 200, {1.0, 0.2, 0.7}, 0.6);
+    Light light3(Vector2<double>(300, 200), 200, {0.1, 1.0, 0.6}, 0.6);
     std::shared_ptr<LightMap> light_map = std::make_shared<LightMap>(window);
     light_map->addLight(&light);
     light_map->addLight(&light2);
+    light_map->addLight(&light3);
 
 
     // Render text
@@ -122,6 +121,7 @@ int main() {
     // Bullets
 
     std::vector<std::shared_ptr<Bullet>> bullets;
+    volatile int shootCoolDonwn = 0;
 
     // Main game loop
     while (window.isOpen()) {
@@ -151,12 +151,15 @@ int main() {
 
 
         // BULLETS //
+        shootCoolDonwn--;
         bool shooting = sf::Mouse::isButtonPressed(sf::Mouse::Left);
-        if (shooting && bullets.size() < 1) {
+        if (shooting && bullets.size() < 10 && shootCoolDonwn <= 0) {
             Vector2<double> bulletDir = (mousePosGame - player.GetPos()).Normalize();
             auto newBullet = player.shootBullet(bulletDir, light_map);
             bullets.push_back(newBullet);
+            shootCoolDonwn = 15;
         }
+
 
         if (!colliding) {
             player.setX(potentialX);
@@ -206,7 +209,7 @@ int main() {
         // Render the lighting to its texture
 
       
-        renderTextureLight.clear(sf::Color(20, 20, 30));
+        renderTextureLight.clear(sf::Color(0, 0, 0));
         light_map->updateCameraView(Vector2<double>(player.getX(), player.getY()));
         light_map->drawLights(renderTextureLight, camera);
         renderTextureLight.display();
@@ -232,7 +235,6 @@ int main() {
         text.setString(
             "Player: " + std::to_string(player.getX()) + ", " + std::to_string(player.getY()) 
             +"\nMouse" + std::to_string(mousePosGame.GetX()) + ", " + std::to_string(mousePosGame.GetY())
-            +"\nPressed: " + std::to_string(shooting)
             +"\nBullets: " + std::to_string(bullets.size())
         );
 

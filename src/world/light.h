@@ -22,16 +22,17 @@ private:
     std::vector<Segment<double>> raySegments_;  
     float angleIncrement;  
     sf::Vector3f color_;
+    float gradientWidth_;
 
 
 public:
 
     Light() {} // Default
 
-    Light(Vector2<double> position): position(position), numRays(720), color_({1.0, 1.0, 1.0}) {
+    Light(Vector2<double> position): position(position), numRays(720), color_({1.0, 1.0, 0.75}), gradientWidth_(0.5) {
         angleIncrement = 360.0f / static_cast<float>(numRays);
     }
-    Light(Vector2<double> position, int numRays, sf::Vector3f color): position(position), numRays(numRays), color_(color) {
+    Light(Vector2<double> position, int numRays, sf::Vector3f color, float width): position(position), numRays(numRays), color_(color), gradientWidth_(width) {
         angleIncrement = 360.0f / static_cast<float>(numRays);
     }
 
@@ -81,6 +82,7 @@ public:
         shader.setUniform("renderTargetRes", sf::Vector2f({static_cast<float>(target.getSize().x), static_cast<float>(target.getSize().y)}));
         shader.setUniform("cameraPos", cam.getPosition());
         shader.setUniform("lightColor", color_);
+        shader.setUniform("gradientWidth", gradientWidth_);
 
         
         for (int i = 0; i < raySegments_.size(); i++){

@@ -24,7 +24,7 @@ private:
 public:
     Bullet(Vector2<double> pos, sf::Texture& texture, Vector2<double> dir, std::shared_ptr<LightMap> lmap)
         : GameObject(pos, texture), speed_(2000), lifetime_(60), direction_(dir.Normalize()), lMap_(lmap) {
-            bulletLight_ = Light(pos, 100, {1.0, 0.4, 0.0});
+            bulletLight_ = Light(pos, 100, {1.0, 0.6, 0.4}, 0.1);
             lMap_->addLight(&bulletLight_); // Access LightMap through shared_ptr
     }
     
