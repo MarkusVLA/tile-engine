@@ -16,6 +16,7 @@
 #include "utils/rand.h"
 #include "world/bullet.h"
 #include "utils/post_processing.h"
+#include "utils/sprite_manager.h"
 #include <memory>
 #include <map>
 
@@ -67,24 +68,29 @@ void updateRenderTextureView(sf::RenderTexture& renderTexture, const Camera& cam
 int main() {
 
 
-    sf::Vector2u windowSize = {1000, 1000};
-    sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
-    sf::Vector2u renderTextureSize = {500, 500}; // Size to scale up
 
-    // Create render textures for different layers with the smaller size
+
+
+
+    sf::Vector2u windowSize = {800, 800};
+    sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
+    sf::Vector2u renderTextureSize = {400, 400}; // Size to scale up
     sf::RenderTexture renderTextureMap;
     renderTextureMap.create({renderTextureSize.x, renderTextureSize.y});
     sf::RenderTexture renderTextureLight;
     renderTextureLight.create({renderTextureSize.x, renderTextureSize.y});
+    sf::RenderTexture renderTextureUI;
+    renderTextureUI.create({renderTextureSize.x, renderTextureSize.y});
 
-    window.setFramerateLimit(FPS); // Set frame rate limit
+    window.setFramerateLimit(FPS);
 
     // Camera setup
     sf::Rect<float> viewRect(sf::Vector2f(0,0), sf::Vector2f(static_cast<float>(renderTextureSize.x), static_cast<float>(renderTextureSize.y)));
     Camera camera(viewRect);
 
     loadTextures();
-
+    // Sprite manager
+    std::shared_ptr<SpriteManager> sprite_manager = std::make_shared<SpriteManager>();
     // Obstacle setup
     ObstacleManager obstacle_manager;
     // Map setup
@@ -111,7 +117,7 @@ int main() {
     sf::Font font;
     if (!font.loadFromFile("../src/assets/fonts/tuffy.ttf"))
         return EXIT_FAILURE;
-    sf::Text text(font, "Time Step", 20);
+    sf::Text text(font, "Time Step", 12);
 
     // Bullets
 
@@ -129,25 +135,15 @@ int main() {
                 window.close();
             }
         }
-
         sf::Vector2i mousePosWindow = sf::Mouse::getPosition(window);
-
         Vector2<double> mousePosGame = Vector2<double>(
             (static_cast<double>(mousePosWindow.x) * renderTextureSize.x) / windowSize.x - renderTextureSize.x / 2.0 + camera.getPosition().x,
             (static_cast<double>(mousePosWindow.y) * renderTextureSize.y) / windowSize.y - renderTextureSize.y / 2.0 + camera.getPosition().y
         );
 
-
-
-        // Calculate potential new position
         double potentialX = player.getX() + (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ? -movementSpeed : (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ? movementSpeed : 0.0f));
         double potentialY = player.getY() + (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ? -movementSpeed : (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ? movementSpeed : 0.0f));
-
-        // Check for collision at the potential new position
         bool colliding = player.checkCollisionWithMap(gameMap, potentialX, potentialY);
-        
-
-
         // BULLETS //
         shootCoolDonwn--;
         bool shooting = sf::Mouse::isButtonPressed(sf::Mouse::Left);
@@ -158,97 +154,74 @@ int main() {
             shootCoolDonwn = 15;
         }
 
-
         if (!colliding) {
             player.setX(potentialX);
             player.setY(potentialY);
         }
-        
-        player.updateSpritePos();
 
+        player.updateSpritePos();
         light_map->castRays(obstacle_manager); 
 
-
-        // Update camera position
         camera.setPosition(sf::Vector2f(static_cast<float>(player.getX()), static_cast<float>(player.getY())));
-        
         floor.updateVisibleTiles(camera.getView());
+        
+        light_map->updateCameraView(Vector2<double>(player.getX(), player.getY()));
 
-        // Update the views of render textures to match the camera
-        updateRenderTextureView(renderTextureMap, camera);
-        updateRenderTextureView(renderTextureLight, camera);
-
-        // Game map rendering.
-        renderTextureMap.clear();
-        floor.draw(renderTextureMap);
-        gameMap.draw(renderTextureMap);
-        player.draw(renderTextureMap);
-
-        // Update and draw bullets
         for (auto it = bullets.begin(); it != bullets.end(); ) {
             (*it)->update(1.0 / FPS);
-            (*it)->draw(renderTextureMap, camera.getPosition());
-
             if ((*it)->shouldDestroy(gameMap)) {
-                it = bullets.erase(it); // Erase the bullet and move to the next
+                it = bullets.erase(it);
             } else {
-                ++it; // Only increment if not erasing
+                ++it; 
             }
-
         }
 
-        //////////////////////////////////////////////////////
-        
-        renderTextureMap.display();
-
-        // Render the lighting to its texture
-
-      
-        renderTextureLight.clear(sf::Color(12, 12, 12));
-        light_map->updateCameraView(Vector2<double>(player.getX(), player.getY()));
-        light_map->drawLights(renderTextureLight, camera);
-        renderTextureLight.display();
-       
-
-        window.clear();
-
-        sf::Sprite mapSprite(renderTextureMap.getTexture());
-
-        mapSprite.setScale(
-            {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
-            static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
-        );
-
-        // window.draw(mapSprite); // Draw the scaled game map
-
-
-        perspectiveShader.apply(mapSprite, sf::Vector2f(windowSize));
-        lightLayerShader.apply(mapSprite, sf::Vector2f(windowSize));
-
-
-
-        window.draw(mapSprite, &perspectiveShader.getShader());
-
-        
-        sf::Sprite lightSprite(renderTextureLight.getTexture());
-        lightSprite.setScale(
-            {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
-            static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
-        );
-
-        // Debug text
         text.setString(
             "Player: " + std::to_string(player.getX()) + ", " + std::to_string(player.getY()) 
             +"\nMouse" + std::to_string(mousePosGame.GetX()) + ", " + std::to_string(mousePosGame.GetY())
             +"\nBullets: " + std::to_string(bullets.size())
         );
 
-        // window.draw(lightSprite, sf::BlendMultiply); // Draw the scaled lighting with blending
-        window.draw(lightSprite, sf::RenderStates(sf::BlendMultiply, sf::Transform(), nullptr, &lightLayerShader.getShader()));
 
-        window.draw(text, sf::BlendAdd);
-        window.display();
+
+
+        //////////// DRAWING /////////////
+        // Update the views of render textures to match the camera
+        updateRenderTextureView(renderTextureMap, camera);
+        updateRenderTextureView(renderTextureLight, camera);
+        window.clear();
+        renderTextureLight.clear(sf::Color(12, 12, 12));
+        renderTextureUI.clear();
+        renderTextureMap.clear();
+        floor.draw(renderTextureMap);
+        gameMap.draw(renderTextureMap);
+        player.draw(renderTextureMap);
+        renderTextureUI.draw(text);
+        light_map->drawLights(renderTextureLight, camera);
+        for (auto & bullet: bullets) bullet->draw(renderTextureMap, camera.getPosition());
+        sf::Sprite lightSprite(renderTextureLight.getTexture());
+        lightSprite.setScale(
+            {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
+            static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
+        );
+        sf::Sprite UI_sprite(renderTextureUI.getTexture());
+        UI_sprite.setScale(
+            {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
+            static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
+        );
+        sf::Sprite mapSprite(renderTextureMap.getTexture());
+        perspectiveShader.apply(mapSprite, sf::Vector2f(windowSize));
+        lightLayerShader.apply(mapSprite, sf::Vector2f(windowSize));
+        mapSprite.setScale(
+            {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
+            static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
+        );
+        {   // Draw sprites to window with apropriate shader.
+            window.draw(mapSprite, &perspectiveShader.getShader());
+            window.draw(lightSprite, sf::RenderStates(sf::BlendMultiply, sf::Transform(), nullptr, &lightLayerShader.getShader()));
+            window.draw(UI_sprite, sf::BlendAdd);
+            window.display();
+        }
     }
-
     return 0;
 }
