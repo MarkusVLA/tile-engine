@@ -25,6 +25,7 @@ public:
                 tileVisibility.push_back(false); // Initially, all tiles are not visible
             }
         }
+        std::cout << "Created floor" << std::endl;
     }
 
     void updateVisibleTiles(const sf::View& cameraView) {

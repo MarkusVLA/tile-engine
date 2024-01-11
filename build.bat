@@ -15,5 +15,5 @@ cd build
 cmake ..
 cmake --build . --config Release
 
-move Release\app.exe 
-.\app.exe
+move Release\app.exe ../game
+cd ../game && .\app.exe

@@ -4,6 +4,8 @@
  * @brief 
  */
 
+/*
+
 #include <SFML/Graphics.hpp>
 #include "world/player.hpp"
 #include "world/map.hpp"
@@ -21,28 +23,11 @@
 #include <memory>
 #include <map>
 
+#include "game.hpp"
+
 #define TILESIZE 64
 #define FLOORSIZE 256
 #define FPS 80
-
-
-void setUpMap(Map &gameMap, std::shared_ptr<SpriteManager> manager) {
-    int roomSize = 20;
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-    // Create the room
-    for (int y = 0; y < roomSize; y++) {
-        for (int x = 0; x < roomSize; x++) {
-            // Add some random tiles
-            if (Random::GetRandomDoubleUniform(0.0, 1.0, seed) < 0.1) { // 10% chance to add a tile
-                gameMap.addTile(Tile(Vector2<double>(x * TILESIZE, y * TILESIZE), manager));
-            }
-        }
-    }
-}
-
-
-
 
 void updateRenderTextureView(sf::RenderTexture& renderTexture, const Camera& camera) {
     sf::View view = camera.getView(); // Assuming your Camera class has a getView method
@@ -77,11 +62,10 @@ int main() {
     ObstacleManager obstacle_manager;
     // Map setup
     const float movementSpeed = 2.0f;
-    Map gameMap;
-
-    setUpMap(gameMap, sprite_manager);
+    // Game map setup
+    Map gameMap(sprite_manager);
     
-    Player player(Vector2<double>(), sprite_manager);
+    Player player(Vector2<double>(-100, -100), sprite_manager);
     obstacle_manager.buildObstacleMap(gameMap);
 
 
@@ -225,5 +209,26 @@ int main() {
             window.display();
         }
     }
+    return 0;
+}
+
+*/
+/**/
+
+#include "game.hpp"
+#include <iostream>
+
+int main() {
+    std::cout << "Program started" << std::endl;
+    std::cout.flush(); // Ensure the output is flushed immediately
+    Game game;
+    try {
+        game.run();
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown exception caught" << std::endl;
+    }
+
     return 0;
 }

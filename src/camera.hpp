@@ -23,7 +23,9 @@ private:
 
 public:
 
-    Camera(const sf::FloatRect& viewRect): view_(viewRect), smoothingFactor_(0.075f) {}
+    Camera(const sf::FloatRect& viewRect): view_(viewRect), smoothingFactor_(0.075f) {
+        std::cout << "Created new camera" << std::endl;
+    }
 
     // Getters
     sf::View getView() const { return view_; }

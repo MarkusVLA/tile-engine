@@ -14,13 +14,14 @@ endif()
 
 # Set compiler optimization flags
 if(apple OR unix)
-  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto -march=native")
   set(OUTPUT_DIR "Release")
 
 elseif(WIN32)
-  set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+  set(CMAKE_CXX_FLAGS_RELEASE "/O2 /GL")
   set(OUTPUT_DIR "")
 endif()
+
 
 
 # SFML submodule
@@ -31,6 +32,13 @@ add_executable(app
     # All source files
     src/main.cpp
 )
+
+# Enable Link-Time Optimization if supported
+include(CheckIPOSupported)
+check_ipo_supported(RESULT lto_supported OUTPUT error)
+if(lto_supported)
+  set_property(TARGET app PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 target_link_libraries(app sfml-graphics sfml-window sfml-system)
 

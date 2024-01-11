@@ -35,7 +35,9 @@ private:
 public:
 
     SpriteManager(){
+        std::cout << "Loading textures" << std::endl;
         loadTextures();
+        std::cout << "Created sprite manager" << std::endl;
     }
 
     sf::Texture getTexture(std::string texName){ return textures[texName]; }
@@ -45,6 +47,10 @@ public:
         sf::Sprite sprite(textures[texName]);
         sprite.setPosition(drawPos.toSF_Vectorf());
         target.draw(sprite);
+    }
+
+    void ping(void){
+        std::cout << "Spritemanager: pong" << std::endl;
     }
 
 };
