@@ -12,7 +12,7 @@ private:
     bool visible_;
 
 public:
-    Tile(Vector2<double> pos, sf::Texture &texture);
+    Tile(Vector2<double> pos, std::shared_ptr<SpriteManager> manager);
     ~Tile();
 
     std::vector<Obstacle> getObstacles(void);
@@ -21,7 +21,7 @@ public:
     bool isVisible(void) { return visible_; }
 };
 
-Tile::Tile(Vector2<double> pos, sf::Texture &texture): GameObject(pos , texture) { }
+Tile::Tile(Vector2<double> pos, std::shared_ptr<SpriteManager> manager): GameObject(pos , manager, "tile") { }
 Tile::~Tile() { }
 
 

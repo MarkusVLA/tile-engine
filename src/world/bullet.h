@@ -24,8 +24,8 @@ private:
     sf::Shader shader_;
 
 public:
-    Bullet(Vector2<double> pos, sf::Texture& texture, Vector2<double> dir, std::shared_ptr<LightMap> lmap)
-        : GameObject(pos, texture), speed_(600), lifetime_(120), direction_(dir.Normalize()), lMap_(lmap) {
+    Bullet(Vector2<double> pos, std::shared_ptr<SpriteManager> manager, Vector2<double> dir, std::shared_ptr<LightMap> lmap)
+        : GameObject(pos, manager, "default"), speed_(600), lifetime_(120), direction_(dir.Normalize()), lMap_(lmap) {
             bulletLight_ = Light(pos, 100, {1.0, 0.6, 0.4}, 0.3);
             lMap_->addLight(&bulletLight_); // Access LightMap through shared_ptr
 
@@ -58,10 +58,9 @@ public:
         rect_.SetCornerA(pos_);
         rect_.SetCornerB(pos_ + size_);
         bulletLight_.setPosition(pos_);
-        updateSpritePos();
         lifetime_--;
     }
-
+    
     bool checkCollisionWithMap(Map& gameMap) {
     Rect<double> bulletRect = getRect(); 
         for (auto tile : gameMap.getTiles()) {

@@ -23,12 +23,12 @@ private:
         std::cerr << "Failed to load default texture" << std::endl;
     }
 
-    if (!textures["sheet"].loadFromFile("../src/assets/textures/sheet.png")) {
-        std::cerr << "Failed to load default texture" << std::endl;
-    }
-
     if (!textures["floor"].loadFromFile("../src/assets/textures/floor.png")) {
         std::cerr << "Failed to load floor texture" << std::endl;
+    }
+
+    if (!textures["cursor"].loadFromFile("../src/assets/textures/cursor.png")) {
+        std::cerr << "Failed to load cursor texture" << std::endl;
     }
 }
 
@@ -37,6 +37,8 @@ public:
     SpriteManager(){
         loadTextures();
     }
+
+    sf::Texture getTexture(std::string texName){ return textures[texName]; }
 
     void drawSprite(sf::RenderTarget &target, std::string texName, Vector2<double> drawPos){
         // Create sprite from texture and draw it in the correct position

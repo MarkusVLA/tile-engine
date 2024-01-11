@@ -18,7 +18,6 @@ class Light {
 private:
     Vector2<double> position;
     int numRays;
-    double radius;
     std::vector<Segment<double>> raySegments_;  
     float angleIncrement;  
     sf::Vector3f color_;
@@ -32,14 +31,10 @@ public:
     Light(Vector2<double> position): position(position), numRays(720), color_({1.0, 1.0, 0.75}), gradientWidth_(0.5) {
         angleIncrement = 360.0f / static_cast<float>(numRays);
     }
+    
     Light(Vector2<double> position, int numRays, sf::Vector3f color, float width): position(position), numRays(numRays), color_(color), gradientWidth_(width) {
         angleIncrement = 360.0f / static_cast<float>(numRays);
     }
-
-    double getRadius() const {
-        return radius;
-    }
-
 
     Vector2<double> getPosition() const {
         return position;

@@ -13,6 +13,7 @@
 #include "world/light.h"
 #include "world/lightmap.h"
 #include "world/floor.h"
+#include "world/cursor.h"
 #include "utils/rand.h"
 #include "world/bullet.h"
 #include "utils/post_processing.h"
@@ -24,27 +25,8 @@
 #define FLOORSIZE 256
 #define FPS 80
 
-// Global texture storage
-std::map<std::string, sf::Texture> textures;
 
-void loadTextures() {
-    if (!textures["tile"].loadFromFile("../src/assets/textures/tile.png")) {
-        std::cerr << "Failed to load tile texture" << std::endl;
-    }
-    if (!textures["default"].loadFromFile("../src/assets/textures/default.png")) {
-        std::cerr << "Failed to load default texture" << std::endl;
-    }
-
-    if (!textures["sheet"].loadFromFile("../src/assets/textures/sheet.png")) {
-        std::cerr << "Failed to load default texture" << std::endl;
-    }
-
-    if (!textures["floor"].loadFromFile("../src/assets/textures/floor.png")) {
-        std::cerr << "Failed to load floor texture" << std::endl;
-    }
-}
-
-void setUpMap(Map &gameMap) {
+void setUpMap(Map &gameMap, std::shared_ptr<SpriteManager> manager) {
     int roomSize = 20;
     unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -53,11 +35,14 @@ void setUpMap(Map &gameMap) {
         for (int x = 0; x < roomSize; x++) {
             // Add some random tiles
             if (Random::GetRandomDoubleUniform(0.0, 1.0, seed) < 0.1) { // 10% chance to add a tile
-                gameMap.addTile(Tile(Vector2<double>(x * TILESIZE, y * TILESIZE), textures["tile"]));
+                gameMap.addTile(Tile(Vector2<double>(x * TILESIZE, y * TILESIZE), manager));
             }
         }
     }
 }
+
+
+
 
 void updateRenderTextureView(sf::RenderTexture& renderTexture, const Camera& camera) {
     sf::View view = camera.getView(); // Assuming your Camera class has a getView method
@@ -67,18 +52,15 @@ void updateRenderTextureView(sf::RenderTexture& renderTexture, const Camera& cam
 
 int main() {
 
-
-
-
-
-
     sf::Vector2u windowSize = {800, 800};
     sf::RenderWindow window(sf::VideoMode(windowSize, 8), "Game");
+    window.setMouseCursorVisible(false);
     sf::Vector2u renderTextureSize = {400, 400}; // Size to scale up
     sf::RenderTexture renderTextureMap;
     renderTextureMap.create({renderTextureSize.x, renderTextureSize.y});
     sf::RenderTexture renderTextureLight;
     renderTextureLight.create({renderTextureSize.x, renderTextureSize.y});
+
     sf::RenderTexture renderTextureUI;
     renderTextureUI.create({renderTextureSize.x, renderTextureSize.y});
 
@@ -88,22 +70,23 @@ int main() {
     sf::Rect<float> viewRect(sf::Vector2f(0,0), sf::Vector2f(static_cast<float>(renderTextureSize.x), static_cast<float>(renderTextureSize.y)));
     Camera camera(viewRect);
 
-    loadTextures();
     // Sprite manager
     std::shared_ptr<SpriteManager> sprite_manager = std::make_shared<SpriteManager>();
+
     // Obstacle setup
     ObstacleManager obstacle_manager;
     // Map setup
     const float movementSpeed = 2.0f;
     Map gameMap;
-    setUpMap(gameMap);
+
+    setUpMap(gameMap, sprite_manager);
     
-    Player player(Vector2<double>(), textures["default"]);
+    Player player(Vector2<double>(), sprite_manager);
     obstacle_manager.buildObstacleMap(gameMap);
 
 
     // FLoor setup
-    Floor floor(textures["floor"]);
+    Floor floor(sprite_manager);
 
     // Light setup
     Light light2(Vector2<double>(200, 100), 200, {1.0, 0.2, 0.7}, 0.6);
@@ -124,6 +107,10 @@ int main() {
     std::vector<std::shared_ptr<Bullet>> bullets;
     volatile int shootCoolDonwn = 0;
 
+
+    // Mouse cursor.
+    Cursor cursor(sprite_manager);
+
     Transforms::PerspectiveShader perspectiveShader;
     Transforms::LightPerspectiveShader lightLayerShader;
 
@@ -140,6 +127,8 @@ int main() {
             (static_cast<double>(mousePosWindow.x) * renderTextureSize.x) / windowSize.x - renderTextureSize.x / 2.0 + camera.getPosition().x,
             (static_cast<double>(mousePosWindow.y) * renderTextureSize.y) / windowSize.y - renderTextureSize.y / 2.0 + camera.getPosition().y
         );
+        
+        cursor.setPos(mousePosGame);
 
         double potentialX = player.getX() + (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ? -movementSpeed : (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ? movementSpeed : 0.0f));
         double potentialY = player.getY() + (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ? -movementSpeed : (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ? movementSpeed : 0.0f));
@@ -159,7 +148,6 @@ int main() {
             player.setY(potentialY);
         }
 
-        player.updateSpritePos();
         light_map->castRays(obstacle_manager); 
 
         camera.setPosition(sf::Vector2f(static_cast<float>(player.getX()), static_cast<float>(player.getY())));
@@ -182,21 +170,29 @@ int main() {
             +"\nBullets: " + std::to_string(bullets.size())
         );
 
-
+        text.setPosition(camera.getPosition() - sf::Vector2f(renderTextureSize.x / 2, renderTextureSize.y / 2));
 
 
         //////////// DRAWING /////////////
         // Update the views of render textures to match the camera
         updateRenderTextureView(renderTextureMap, camera);
         updateRenderTextureView(renderTextureLight, camera);
+        updateRenderTextureView(renderTextureUI, camera);
+        
+
         window.clear();
         renderTextureLight.clear(sf::Color(12, 12, 12));
-        renderTextureUI.clear();
         renderTextureMap.clear();
+        renderTextureUI.clear();
+
         floor.draw(renderTextureMap);
         gameMap.draw(renderTextureMap);
         player.draw(renderTextureMap);
         renderTextureUI.draw(text);
+        cursor.draw(renderTextureUI);
+
+        renderTextureUI.display();
+
         light_map->drawLights(renderTextureLight, camera);
         for (auto & bullet: bullets) bullet->draw(renderTextureMap, camera.getPosition());
         sf::Sprite lightSprite(renderTextureLight.getTexture());
@@ -204,22 +200,28 @@ int main() {
             {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
             static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
         );
-        sf::Sprite UI_sprite(renderTextureUI.getTexture());
-        UI_sprite.setScale(
-            {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
-            static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
-        );
+        
         sf::Sprite mapSprite(renderTextureMap.getTexture());
-        perspectiveShader.apply(mapSprite, sf::Vector2f(windowSize));
-        lightLayerShader.apply(mapSprite, sf::Vector2f(windowSize));
         mapSprite.setScale(
             {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
             static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
         );
+
+        sf::Sprite renderTextureUISprite(renderTextureUI.getTexture());
+        renderTextureUISprite.setScale(
+            {static_cast<float>(windowSize.x) / renderTextureSize.x, // Scale X
+            static_cast<float>(windowSize.y) / renderTextureSize.y}  // Scale Y
+        );
+
+
+        perspectiveShader.apply(mapSprite, sf::Vector2f(windowSize));
+        lightLayerShader.apply(lightSprite, sf::Vector2f(windowSize));
+        
+        
         {   // Draw sprites to window with apropriate shader.
             window.draw(mapSprite, &perspectiveShader.getShader());
             window.draw(lightSprite, sf::RenderStates(sf::BlendMultiply, sf::Transform(), nullptr, &lightLayerShader.getShader()));
-            window.draw(UI_sprite, sf::BlendAdd);
+            window.draw(renderTextureUISprite, sf::BlendAdd);
             window.display();
         }
     }

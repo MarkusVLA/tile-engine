@@ -17,22 +17,22 @@
 #include <ostream>
 #include "../utils/vec.h"
 #include "../utils/rect.h"
+#include "../utils/sprite_manager.h"
 
 
 class GameObject {
 
 protected:
 
-    sf::Texture &texture_; // Reference to texture
-    sf::Sprite sprite_;
-    std::string id_;
+    std::shared_ptr<SpriteManager> sprite_manager_;
     Vector2<double> pos_;
     Vector2<double> size_;
     Rect<double> rect_;
+    std::string textureName_;
 
 public:
 
-    GameObject(Vector2<double> pos, sf::Texture &texture);
+    GameObject(Vector2<double> pos, std::shared_ptr<SpriteManager> manager, std::string textureName);
     ~GameObject();
 
     double getX() const;
@@ -44,19 +44,16 @@ public:
     bool setX(double x);
     bool setY(double y);
 
-    void updateSpritePos(void);
-
-    void draw(sf::RenderTarget &target); // Draw game object on a surface
-    // bool checkCollisionWithMap(Map& gameMap);
-
+    void draw(sf::RenderTarget &target); 
+    
     std::ostream friend &operator<<(std::ostream &os, GameObject &object); // Print Game object info
 
 };
 
-GameObject::GameObject(Vector2<double> pos, sf::Texture &texture): pos_(pos), texture_(texture), sprite_(texture), id_("object id") {
-    size_ = Vector2<double>(texture_.getSize().x, texture_.getSize().y);
+GameObject::GameObject(Vector2<double> pos, std::shared_ptr<SpriteManager> manager, std::string textureName): pos_(pos),sprite_manager_(manager), textureName_(textureName) {
+    sf::Vector2u s = sprite_manager_->getTexture(textureName_).getSize();
+    size_ = Vector2<double>(s.x, s.y);
     rect_ = Rect<double>(pos_, pos_ + size_);
-    updateSpritePos();
 }
 
 GameObject::~GameObject() { }
@@ -82,15 +79,13 @@ bool GameObject::setY(double y) {
 
 }
 
-void GameObject::updateSpritePos(){ sprite_.setPosition(sf::Vector2f(static_cast<float>(pos_.GetX()), static_cast<float>(pos_.GetY()))); }
-
 void GameObject::draw(sf::RenderTarget &target) {
-    target.draw(sprite_);
+    sprite_manager_->drawSprite(target, textureName_, pos_);
 }
 
 
 std::ostream& operator<<(std::ostream &os, GameObject &object) {
-    os << "GameObject: " << object.id_ << "(" << object.pos_.GetX() << ", " << object.pos_.GetY() << ")" << std::endl;
+    os << "GameObject: " << "(" << object.pos_.GetX() << ", " << object.pos_.GetY() << ")" << std::endl;
     return os;
 }
 

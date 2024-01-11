@@ -17,13 +17,14 @@ private:
     int frame_;
 
 public:
-    Player(Vector2<double> pos, sf::Texture &texture): GameObject(pos, texture) { }
+    Player(Vector2<double> pos, std::shared_ptr<SpriteManager> manager): GameObject(pos, manager, "default") { }
     ~Player() { }
 
 
     std::shared_ptr<Bullet> shootBullet(Vector2<double> dir, std::shared_ptr<LightMap> lMap) {
-        return std::make_shared<Bullet>(pos_, texture_, dir, lMap);
+        return std::make_shared<Bullet>(pos_, sprite_manager_, dir, lMap);
     }
+
 
     bool checkCollisionWithMap(Map& gameMap) {
         Rect<double> playerRect = getRect(); 
