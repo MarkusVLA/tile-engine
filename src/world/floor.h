@@ -14,8 +14,8 @@ private:
 
 public:
     // Constructor
-    Floor(std::shared_ptr<SpriteManager> manager, int width = 10000, int height = 10000)
-        : GameObject(Vector2<double>(0, 0), manager, "floor"), tileSize(512) {
+    Floor(std::shared_ptr<SpriteManager> manager, int width = 1000, int height = 1000)
+        : GameObject(Vector2<double>(0, 0), manager, "floor"), tileSize(16) {
         int halfWidth = width / 2;
         int halfHeight = height / 2;
 
@@ -25,7 +25,6 @@ public:
                 tileVisibility.push_back(false); // Initially, all tiles are not visible
             }
         }
-        std::cout << "Created floor" << std::endl;
     }
 
     void updateVisibleTiles(const sf::View& cameraView) {

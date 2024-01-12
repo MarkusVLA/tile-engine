@@ -1,50 +1,24 @@
 
 #pragma once
 #include "gameobject.hpp"
+#include "entity.h"
 #include "tile.hpp"
 #include "../utils/vec.h"
 #include "../utils/rect.h"
 #include "map.hpp"
 #include "bullet.h"
 
-#define PLAYERSIZE sf::Vector2f(16, 16)
+#define NUM_FRAMES 3
 
-class Player: public GameObject {
+class Player: public Entity {
 
-private:
-    Vector2<double> facing_;
-    bool running_;
-    int frame_;
 
 public:
-    Player(Vector2<double> pos, std::shared_ptr<SpriteManager> manager): GameObject(pos, manager, "default") { }
+    Player(Vector2<double> pos, std::shared_ptr<SpriteManager> manager)
+    : Entity(pos, manager, "player1") { }
     ~Player() { }
-
 
     std::shared_ptr<Bullet> shootBullet(Vector2<double> dir, std::shared_ptr<LightMap> lMap) {
         return std::make_shared<Bullet>(pos_, sprite_manager_, dir, lMap);
-    }
-
-
-    bool checkCollisionWithMap(Map& gameMap) {
-        Rect<double> playerRect = getRect(); 
-        for (auto tile : gameMap.getTiles()) {
-            Rect<double> tileRect = tile.getRect();  
-            if (playerRect.Intersects(tileRect)) return true; 
-        return false;  
-        }
-    }
-
-    bool checkCollisionWithMap(Map& gameMap, double potentialX, double potentialY) {
-        Rect<double> playerRect = getRect(); 
-        Vector2<double> delta(potentialX - playerRect.GetCornerA().GetX(), potentialY - playerRect.GetCornerA().GetY());
-        playerRect.move(delta); // Calculate the new position of the player rectangle
-        for (auto tile : gameMap.getTiles()) {
-            Rect<double> tileRect = tile.getRect();  
-            if (playerRect.Intersects(tileRect)) {
-                return true;  
-            }
-        }
-        return false;  
     }
 };

@@ -7,11 +7,13 @@
 #include <string>
 #include <sstream>
 #include <random>
-#include "../utils/sprite_manager.h"
+#include "tile.hpp"
+
 
 #ifndef TILESIZE
-#define TILESIZE 64
+#define TILESIZE 16
 #endif
+
 
 class Map {
 private:
@@ -42,7 +44,7 @@ public:
 
 
    void generateMap() {
-        std::cout << "Reading map ..." << std::endl;
+        std::cout << "Reading map" << std::endl;
         std::ifstream file("map.csv"); // Replace with your CSV file path
         std::string line;
         int y = 0;
@@ -53,10 +55,13 @@ public:
             int x = 0;
 
             while (getline(s, field, ',')) {
-                // Assuming '0' means no tile and '1' means a tile
-                if (field == "1") {
-                    addTile(Tile(Vector2<double>(x * TILESIZE, y * TILESIZE), sprite_manager_));
+                TileType type = static_cast<TileType>(std::stoi(field));
+
+                if (type != TileType::AIR){
+                    addTile(Tile(Vector2<double>(x * TILESIZE, y * TILESIZE), type, sprite_manager_));
                 }
+
+
                 x++;
             }
             y++;

@@ -33,13 +33,6 @@ add_executable(app
     src/main.cpp
 )
 
-# Enable Link-Time Optimization if supported
-include(CheckIPOSupported)
-check_ipo_supported(RESULT lto_supported OUTPUT error)
-if(lto_supported)
-  set_property(TARGET app PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-endif()
-
 target_link_libraries(app sfml-graphics sfml-window sfml-system)
 
 set_target_properties(app PROPERTIES

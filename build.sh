@@ -10,6 +10,12 @@ then
     exit 1
 fi
 
+cd src/assets/textures
+python stitch.py
+python header.py
+
+cd ../../..
+
 # Create and navigate to the build directory
 mkdir -p build
 cd build

@@ -25,9 +25,9 @@
 struct ScreenParams {
 
     std::string name = "Tile Game";
-    sf::Vector2u windowSize = {800, 800};
-    sf::Vector2u renderTextureSize = {400, 400};
-    const int FPS = 80;
+    sf::Vector2u windowSize = {900, 900};
+    sf::Vector2u renderTextureSize = {300, 300};
+    const int FPS = 120;
     ScreenParams(){}
 };
 
@@ -55,6 +55,7 @@ struct Shaders {
 class Game {
 
 private:
+
     ScreenParams params_;
     RenderTargets targets_;
     Shaders shaders_;
@@ -82,9 +83,9 @@ public:
         camera_(sf::Rect<float>(sf::Vector2f(0,0), sf::Vector2f(
             static_cast<float>(params_.renderTextureSize.x),
             static_cast<float>(params_.renderTextureSize.y)))),
-        text_(font, "", 12),
+        text_(font, "", 5),
         floor_(sprite_manager_),
-        player_(Vector2<double>(), sprite_manager_),
+        player_(Vector2<double>(-30, -30), sprite_manager_),
         gameMap_(sprite_manager_),
         cursor_(sprite_manager_)
 
@@ -92,11 +93,11 @@ public:
         std::cout << "Starting game" << std::endl;
         window_.create(sf::VideoMode(params_.windowSize, 8), params_.name);
         window_.setFramerateLimit(params_.FPS);
+        window_.setMouseCursorVisible(false);
         if (!font.loadFromFile("../src/assets/fonts/tuffy.ttf")) {
             std::cerr << "Unable to load font" << std::endl;
         }
         obstacle_manager_.buildObstacleMap(gameMap_);
-        sprite_manager_->ping();
     }
 
     void updateRenderTargetView(RenderTargets& targets, const Camera& camera) {
@@ -118,10 +119,9 @@ public:
 
     void run() {
         
-        std::cout << "Starting game" << std::endl;
         volatile int shootCoolDonwn = 0;
-        Light light2(Vector2<double>(200, 100), 200, {1.0, 0.2, 0.7}, 0.6);
-        Light light3(Vector2<double>(400, 300), 200, {0.1, 1.0, 0.6}, 0.6);
+        Light light2(Vector2<double>(190, 100), 200, {1.0, 0.2, 0.7}, 0.6);
+        Light light3(Vector2<double>(-20, 220), 200, {0.1, 1.0, 0.6}, 0.6);
         light_map_->addLight(&light2);
         light_map_->addLight(&light3);
 
@@ -134,27 +134,26 @@ public:
                 }
             }
 
-
-
             Vector2<double> mousePosGame = getMousePos();
             cursor_.setPos(mousePosGame);
-            double potentialX = player_.getX() + (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ? -2 : (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ? 2 : 0.0f));
-            double potentialY = player_.getY() + (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ? -2 : (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ? 2 : 0.0f));
-            bool colliding = player_.checkCollisionWithMap(gameMap_, potentialX, potentialY);
+
+            
+            double moveX = (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ? -1 : (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ? 1 : 0.0f));
+            double moveY = (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ? -1 : (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ? 1 : 0.0f));
+            player_.move(Vector2<double>(moveX, moveY), gameMap_);
+            
+            
             // BULLETS //
             shootCoolDonwn--;
             bool shooting = sf::Mouse::isButtonPressed(sf::Mouse::Left);
             if (shooting && bullets.size() < 10 && shootCoolDonwn <= 0) {
-                Vector2<double> bulletDir = (mousePosGame - player_.GetPos()).Normalize();
+                Vector2<double> bulletDir = (mousePosGame - player_.getPosition()).Normalize();
                 auto newBullet = player_.shootBullet(bulletDir, light_map_);
                 bullets.push_back(newBullet);
                 shootCoolDonwn = 15;
             }
 
-            if (!colliding) {
-                player_.setX(potentialX);
-                player_.setY(potentialY);
-            }
+
             light_map_->castRays(obstacle_manager_); 
             camera_.setPosition(sf::Vector2f(static_cast<float>(player_.getX()), static_cast<float>(player_.getY())));
             floor_.updateVisibleTiles(camera_.getView());
@@ -181,7 +180,7 @@ public:
             
             updateRenderTargetView(targets_, camera_);
             window_.clear();
-            targets_.renderTextureLight.clear(sf::Color(12, 12, 12));
+            targets_.renderTextureLight.clear(sf::Color(30, 30, 30));
             targets_.renderTextureMap.clear();
             targets_.renderTextureUI.clear();
             floor_.draw(targets_.renderTextureMap);

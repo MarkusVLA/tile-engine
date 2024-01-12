@@ -5,11 +5,13 @@ uniform sampler2D textureSampler;
 uniform vec2 resolution;
 
 void main() {
+
     vec2 p = gl_FragCoord.xy / resolution.xy;
-    float depth = 1.0 - p.y;
-    float centeringFactor = 0.25;
-    p.x = mix(p.x, p.x * (1.0 - centeringFactor) + centeringFactor * 0.5, depth);
-    p.y = mix(p.y, p.y * (1.0 - centeringFactor) + centeringFactor * 0.5, depth);
+    
+    // float depth = 1.0 - p.y;
+    // float centeringFactor = 0.25;
+    // p.x = mix(p.x, p.x * (1.0 - centeringFactor) + centeringFactor * 0.5, depth);
+    // p.y = mix(p.y, p.y * (1.0 - centeringFactor) + centeringFactor * 0.5, depth);
 
 
     // smoothing
@@ -24,6 +26,5 @@ void main() {
     }
 
     color /= 25.0; 
-
     gl_FragColor = color;
 }
