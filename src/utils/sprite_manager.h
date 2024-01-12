@@ -1,38 +1,46 @@
-
 #pragma once
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <map>
+#include <fstream>
 #include <sstream>
 #include "vec.h"
-#include "../assets/textures/atlas.h" // header file with the atlas data
 
-#define SPRITE_SIZE 16
+#define SPRITE_SIZE 16 // Size of the sprite without padding
 
 class SpriteManager {
 private:
     sf::Texture textureAtlas;
     std::map<std::string, sf::IntRect> spritePositions;
+    sf::IntRect textureSampler;
 
-    void loadTextureAtlas() {
-        // Load the texture atlas from the embedded data
-        if (!textureAtlas.loadFromMemory(textureAtlasData, sizeof(textureAtlasData))) {
-            std::cerr << "Failed to load texture atlas from memory" << std::endl;
+    void loadTextureAtlas(const std::string& atlasPath, const std::string& csvPath) {
+        if (!textureAtlas.loadFromFile(atlasPath)) {
+            std::cerr << "Failed to load texture atlas" << std::endl;
             return;
         }
 
-        // Parse the sprite position data from the embedded CSV data
-        for (int i = 0; texturePositionsData[i] != nullptr; ++i) {
-            std::string line(texturePositionsData[i]);
+
+        std::ifstream file(csvPath);
+        std::string line, name;
+        int x, y;
+        while (std::getline(file, line)) {
             std::stringstream linestream(line);
-            std::string name;
-            int x, y;
-            char comma;
-
             std::getline(linestream, name, ',');
-            linestream >> x >> comma >> y;
+            
+            if (!(linestream >> x)) {
+                std::cerr << "Error reading X coordinate for sprite " << name << std::endl;
+                continue;
+            }
+            char comma;
+            linestream >> comma;
+            if (!(linestream >> y)) {
+                std::cerr << "Error reading Y coordinate for sprite " << name << std::endl;
+                continue;
+            }
 
+            std::cout << "Sprite: " << name << ", X: " << x << ", Y: " << y << std::endl;
             spritePositions[name] = sf::IntRect({x, y}, {SPRITE_SIZE, SPRITE_SIZE});
         }
     }
@@ -40,7 +48,7 @@ private:
 public:
     SpriteManager() {   
         std::cout << "Reading texture atlas" << std::endl;
-        loadTextureAtlas(); // Call the new loadTextureAtlas function
+        loadTextureAtlas("../src/assets/textures/texture_atlas.png", "../src/assets/textures/texture_positions.csv");
     }
 
     void drawSprite(sf::RenderTarget &target, const std::string& spriteName, const Vector2<double> drawPos) {

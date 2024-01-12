@@ -26,7 +26,7 @@ struct ScreenParams {
 
     std::string name = "Tile Game";
     sf::Vector2u windowSize = {900, 900};
-    sf::Vector2u renderTextureSize = {300, 300};
+    sf::Vector2u renderTextureSize = {400, 400};
     const int FPS = 120;
     ScreenParams(){}
 };
@@ -83,7 +83,7 @@ public:
         camera_(sf::Rect<float>(sf::Vector2f(0,0), sf::Vector2f(
             static_cast<float>(params_.renderTextureSize.x),
             static_cast<float>(params_.renderTextureSize.y)))),
-        text_(font, "", 5),
+        text_(font, "", 8),
         floor_(sprite_manager_),
         player_(Vector2<double>(-30, -30), sprite_manager_),
         gameMap_(sprite_manager_),
@@ -215,8 +215,7 @@ public:
             shaders_.perspectiveShader.apply(mapSprite, sf::Vector2f(params_.windowSize));
             shaders_.lightLayerShader.apply(lightSprite, sf::Vector2f(params_.windowSize));
             
-            
-            {   // Draw sprites to window with apropriate shader.
+            {
                 window_.draw(mapSprite, &shaders_.perspectiveShader.getShader());
                 window_.draw(lightSprite, sf::RenderStates(sf::BlendMultiply, sf::Transform(), nullptr, &shaders_.lightLayerShader.getShader()));
                 window_.draw(renderTextureUISprite, sf::BlendAdd);

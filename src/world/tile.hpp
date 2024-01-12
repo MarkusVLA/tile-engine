@@ -6,6 +6,7 @@
 #include "obstacle.h"
 
 enum class TileType {
+
     AIR = 0,
     BACK_WALL = 1,
     LEFT_WALL = 2,
@@ -44,16 +45,13 @@ public:
 
         double extension = 24.0;
 
-        // Extend cornerB and cornerD further out by 'extension' units
         Vector2<double> extendedCornerB(cornerB.GetX(), cornerB.GetY() - extension);
         Vector2<double> extendedCornerD(cornerD.GetX(), cornerD.GetY() - extension);
 
         obstacles.push_back(Obstacle(cornerA, cornerC));
         obstacles.push_back(Obstacle(cornerC, cornerB));
-        obstacles.push_back(Obstacle(cornerB, cornerD)); // Use extended points
+        obstacles.push_back(Obstacle(cornerB, cornerD));
         obstacles.push_back(Obstacle(cornerD, cornerA));
-
-
         return obstacles;
     }
 

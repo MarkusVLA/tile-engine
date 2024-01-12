@@ -8,9 +8,7 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-cd src/assets/textures
-python stitch.py
-python header.py
+cd src/assets/textures && python stitch.py
 
 cd ../../..
 
