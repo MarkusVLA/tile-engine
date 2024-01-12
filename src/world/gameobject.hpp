@@ -1,14 +1,3 @@
-/**
- * @file gameobject.hpp
- * @author Markus Lång
- * @brief 
- * @version 0.1
- * @date 2023-11-18
- * 
- * @copyright Copyright (c) 2023
- * 
- */
-
 
 #pragma once
 
@@ -26,31 +15,33 @@ protected:
     Vector2<double> size_;
     Rect<double> rect_;
 public:
-    GameObject(Vector2<double> pos, std::shared_ptr<SpriteManager> manager, std::string textureName, Vector2<double> rectSize = Vector2<double>(16, 16) ): pos_(pos),sprite_manager_(manager), textureName_(textureName) {
+    GameObject(Vector2<double> pos, std::shared_ptr<SpriteManager> manager, std::string textureName, Vector2<double> rectSize = Vector2<double>(16, 16) )
+        : pos_(pos),sprite_manager_(manager), textureName_(textureName) {
         size_ = Vector2<double>(rectSize);
         rect_ = Rect<double>(pos_, pos_ + size_);
     }
+
     ~GameObject() { }
     double getX() const { return pos_.GetX(); }
     double getY() const { return pos_.GetY(); }
     Vector2<double> getPosition() { return pos_; }
     Rect<double> getRect(void) const { return rect_; }
+
     void setX(double x) { 
         pos_.SetX(x);
         rect_.SetCornerA(pos_);
         rect_.SetCornerB(pos_ + size_);
     }
+
     void setY(double y) {
         pos_.SetY(y);
         rect_.SetCornerA(pos_);
         rect_.SetCornerB(pos_ + size_);
     }
+
     void setPosition(Vector2<double> pos){
         setX(pos.GetX());
         setY(pos.GetY());
-    }
-    void draw(sf::RenderTarget &target) {
-        sprite_manager_->drawSprite(target, textureName_, pos_);
     }
 
     friend std::ostream& operator<<(std::ostream &os, GameObject &object) {

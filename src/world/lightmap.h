@@ -25,6 +25,13 @@ public:
         }
     }
 
+    ~LightMap() {
+        // Free light map.
+        for (auto & light: lights){
+            delete light;
+        }
+    }
+
 
     void castRays(ObstacleManager man){
         for (auto light: lights){

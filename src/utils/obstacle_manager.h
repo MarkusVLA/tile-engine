@@ -17,11 +17,11 @@ public:
         obstacles.clear();
         const auto& tiles = map.getTiles();
         for (auto tile : tiles) {
-            Vector2<double> start = tile.getRect().GetCornerA();
-            Vector2<double> end = tile.getRect().GetCornerB();
+            Vector2<double> start = tile->getRect().GetCornerA();
+            Vector2<double> end = tile->getRect().GetCornerB();
             
-            if (tile.isVisible()) {
-                std::vector<Obstacle> obstacles = tile.getObstacles();
+            if (tile->isVisible()) {
+                std::vector<Obstacle> obstacles = tile->getObstacles();
                 for (auto obstacle : obstacles) {
                     addObstacle(obstacle);
                 }

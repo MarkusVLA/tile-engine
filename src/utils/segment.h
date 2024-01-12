@@ -2,7 +2,6 @@
 
 // Line Segment class
 // Used for raycasting
-
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "vec.h"
@@ -30,5 +29,14 @@ public:
         if (A.getAngle() < B.getAngle()) return 0;
         if (A.getAngle() > B.getAngle()) return 1;
         else return 0;
+    }
+
+    void draw(sf::RenderTarget& target){
+        sf::Vertex line[] = {
+            sf::Vertex(sf::Vector2f(static_cast<float>(begin_.GetX()), static_cast<float>(begin_.GetY())), sf::Color::Green),
+            sf::Vertex(sf::Vector2f(static_cast<float>(end_.GetX()), static_cast<float>(begin_.GetY())), sf::Color::Green)
+        };
+        
+        target.draw(line, 2, sf::PrimitiveType::Lines);
     }
 };

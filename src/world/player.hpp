@@ -13,7 +13,7 @@ class Player: public Entity {
 
 public:
     Player(Vector2<double> pos, std::shared_ptr<SpriteManager> manager)
-    : Entity(pos, manager, "player1") { }
+    : Entity(pos, manager, "player") { }
     ~Player() { }
 
     std::shared_ptr<Bullet> shootBullet(Vector2<double> dir, std::shared_ptr<LightMap> lMap) {

@@ -36,8 +36,8 @@ public:
         newRect.move(delta);
         for (auto& tile: gameMap.getTiles()) {
             
-            if (tile.isVisible()){
-                Rect<double> tileRect = tile.getRect();
+            if (tile->isVisible()){
+                Rect<double> tileRect = tile->getRect();
                 // Chek if new pos intersects with the tile and scale newPos accordingly
                 if (newRect.Intersects(tileRect)){
                     return;

@@ -64,7 +64,7 @@ public:
     bool checkCollisionWithMap(Map& gameMap) {
     Rect<double> bulletRect = getRect(); 
         for (auto tile : gameMap.getTiles()) {
-            Rect<double> tileRect = tile.getRect();  
+            Rect<double> tileRect = tile->getRect();  
             if (bulletRect.Intersects(tileRect)) {
                 return true; 
             }

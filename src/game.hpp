@@ -12,16 +12,16 @@
 #include "world/cursor.h"
 #include "utils/rand.h"
 #include "world/bullet.h"
+#include "world/enemies.h"
 #include "utils/post_processing.h"
 #include "utils/sprite_manager.h"
-#include "world/enemies.h"
 #include <memory>
 #include <map>
 
 
 struct ScreenParams {
     std::string name = "Tile Game";
-    sf::Vector2u windowSize = {900, 900};
+    sf::Vector2u windowSize = {1000, 1000};
     sf::Vector2u renderTextureSize = {400, 400};
     const int FPS = 120;
     ScreenParams(){}
@@ -75,8 +75,8 @@ private:
 
     Floor floor_;
     Player player_;
-    Enemy testEnemy_;
-    Map gameMap_;
+    std::vector<Enemy> enemies_;
+    Map gameMap_; 
     Cursor cursor_;
     
 public:
@@ -88,12 +88,11 @@ public:
         camera_(sf::Rect<float>(sf::Vector2f(0,0), sf::Vector2f(
             static_cast<float>(params_.renderTextureSize.x),
             static_cast<float>(params_.renderTextureSize.y)))),
-        text_(font, "", 8),
+        text_(font, "", 10 ),
         floor_(sprite_manager_),
         player_(Vector2<double>(-30, -30), sprite_manager_),
         gameMap_(sprite_manager_),
-        cursor_(sprite_manager_),
-        testEnemy_(Vector2<double> (300, 300), sprite_manager_)
+        cursor_(sprite_manager_)
 
     {
         std::cout << "Starting game" << std::endl;
@@ -104,6 +103,8 @@ public:
             std::cerr << "Unable to load font" << std::endl;
         }
         obstacle_manager_.buildObstacleMap(gameMap_);
+        enemies_.emplace_back(Vector2<double> (300, 300), sprite_manager_);
+
     }
 
     void updateRenderTargetView(RenderTargets& targets, const Camera& camera) {
@@ -133,8 +134,11 @@ public:
         player_.move(Vector2<double>(moveX, moveY), gameMap_);
         
         // test enemy movement
-        testEnemy_.setTarget(player_.getPosition());
-        testEnemy_.follow(gameMap_); // follow the player
+        for (auto &enemy: enemies_){
+            enemy.setTarget(player_.getPosition());
+            enemy.follow(gameMap_); // follow the player
+        
+        }
         
         // BULLETS //
         shootCoolDonwn--;
@@ -175,18 +179,20 @@ public:
 
         updateRenderTargetView(targets_, camera_);
         window_.clear();
-        targets_.renderTextureLight.clear(sf::Color(40, 40, 50));
+        targets_.renderTextureLight.clear(sf::Color(60, 60, 80));
         targets_.renderTextureMap.clear();
         targets_.renderTextureUI.clear();
         floor_.draw(targets_.renderTextureMap);
         gameMap_.draw(targets_.renderTextureMap);
         player_.draw(targets_.renderTextureMap);
-        testEnemy_.draw(targets_.renderTextureMap);
         targets_.renderTextureUI.draw(text_);
         cursor_.draw(targets_.renderTextureUI);
         targets_.renderTextureUI.display();
         light_map_->drawLights(targets_.renderTextureLight, camera_);
 
+        for (auto & enemy: enemies_){
+            enemy.draw(targets_.renderTextureMap);
+        }
 
         for (auto & bullet: bullets) bullet->draw(targets_.renderTextureMap, camera_.getPosition());
         sf::Sprite lightSprite(targets_.renderTextureLight.getTexture());
@@ -222,10 +228,12 @@ public:
 
     void run() {
         
+        Light light1(Vector2<double>(0,0), 200, {0.8,5,0}, 0.3);
         Light light2(Vector2<double>(190, 100), 200, {1.0, 0.2, 0.7}, 0.6);
         Light light3(Vector2<double>(-20, 220), 200, {0.1, 1.0, 0.6}, 0.6);
         light_map_->addLight(&light2);
         light_map_->addLight(&light3);
+        light_map_->addLight(&light1);
 
         
         while (window_.isOpen()) {
@@ -233,6 +241,8 @@ public:
             while (window_.pollEvent(event)) {
                 if (event.type == sf::Event::Closed) {
                     window_.close();
+                } if (event.type == sf::Event::Resized){
+
                 }
             }
 
