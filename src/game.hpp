@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <SFML/Graphics.hpp>
 #include "world/player.hpp"
 #include "world/map.hpp"
@@ -19,11 +18,7 @@
 #include <map>
 
 
-#define TILESIZE 64
-#define FLOORSIZE 256
-
 struct ScreenParams {
-
     std::string name = "Tile Game";
     sf::Vector2u windowSize = {900, 900};
     sf::Vector2u renderTextureSize = {400, 400};
@@ -36,11 +31,14 @@ struct RenderTargets {
     sf::RenderTexture renderTextureMap;
     sf::RenderTexture renderTextureLight;
     sf::RenderTexture renderTextureUI;
-
     RenderTargets(ScreenParams params) {
-        renderTextureMap.create({params.renderTextureSize.x, params.renderTextureSize.y});
-        renderTextureLight.create({params.renderTextureSize.x, params.renderTextureSize.y});
-        renderTextureUI.create({params.renderTextureSize.x, params.renderTextureSize.y});
+        if(!renderTextureMap.create({params.renderTextureSize.x, params.renderTextureSize.y})){
+            std::cerr << "Unable to create render texture" << std::endl;
+        } if(!renderTextureLight.create({params.renderTextureSize.x, params.renderTextureSize.y})){
+            std::cerr << "Unable to create render texture" << std::endl;
+        } if(!renderTextureUI.create({params.renderTextureSize.x, params.renderTextureSize.y})){
+            std::cerr << "Unable to create render texture" << std::endl;
+        }
     }
 
 };
@@ -157,7 +155,6 @@ public:
             light_map_->castRays(obstacle_manager_); 
             camera_.setPosition(sf::Vector2f(static_cast<float>(player_.getX()), static_cast<float>(player_.getY())));
             floor_.updateVisibleTiles(camera_.getView());
-            light_map_->updateCameraView(Vector2<double>(player_.getX(), player_.getY()));
             for (auto it = bullets.begin(); it != bullets.end(); ) {
                 (*it)->update(1.0 / params_.FPS);
                 if ((*it)->shouldDestroy(gameMap_)) {

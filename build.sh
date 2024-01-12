@@ -10,9 +10,7 @@ then
     exit 1
 fi
 
-cd src/assets/textures
-python stitch.py
-python header.py
+cd src/assets/textures && python3 stitch.py
 
 cd ../../..
 
@@ -25,5 +23,5 @@ cmake ..
 cmake --build . --config Release
 
 
-# Move and execute the app
-./app
+mv app ../game
+cd ../game && ./app

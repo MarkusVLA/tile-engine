@@ -53,14 +53,12 @@ public:
             std::istringstream s(line);
             std::string field;
             int x = 0;
-
             while (getline(s, field, ',')) {
                 TileType type = static_cast<TileType>(std::stoi(field));
-
                 if (type != TileType::AIR){
+                    std::cout << "Adding tile " << static_cast<int>(type) << " to " << x*TILESIZE << ", " << y*TILESIZE << std::endl;
                     addTile(Tile(Vector2<double>(x * TILESIZE, y * TILESIZE), type, sprite_manager_));
                 }
-
 
                 x++;
             }
