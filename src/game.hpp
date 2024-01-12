@@ -146,7 +146,7 @@ public:
             shootCoolDonwn = 15;
         }
 
-
+        obstacle_manager_.buildObstacleMap(gameMap_); // Build map again so that only tiles in camera view are inclued
         light_map_->castRays(obstacle_manager_); 
         camera_.setPosition(sf::Vector2f(static_cast<float>(player_.getX()), static_cast<float>(player_.getY())));
         floor_.updateVisibleTiles(camera_.getView());

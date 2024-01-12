@@ -46,6 +46,11 @@ public:
         cornerB_ += delta;
     }
 
+    void stretch(Vector2<double> factor){
+        cornerA_ -= factor;
+        cornerB_ += factor;
+    }
+
     bool Contains(Vector2<Type> point) const {
         return (point.GetX() >= cornerA_.GetX() && point.GetX() <= cornerB_.GetX() && point.GetY() >= cornerA_.GetY() && point.GetY() <= cornerB_.GetY());
     }

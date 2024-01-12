@@ -28,7 +28,7 @@ private:
 public:
 
     Tile(Vector2<double> pos, TileType type, std::shared_ptr<SpriteManager> manager)
-        : GameObject(pos, manager, tileTypeToString(type)), type_(type) { isVisible_ = true; }
+        : GameObject(pos, manager, tileTypeToString(type)), type_(type) { isVisible_ = false; }
 
 
     ~Tile() { }
@@ -81,6 +81,7 @@ public:
     void setTileVisibility(Camera cam){
         // Set the tiles visibility.
         Rect<double> camviewRect = cam.getViewRect();
+        camviewRect.stretch(Vector2<double>(100, 100)); // Make the cam view rect a bit bigger so light don't glitch out. 
         if (camviewRect.Intersects(rect_)){
             isVisible_ = true;
         } else {

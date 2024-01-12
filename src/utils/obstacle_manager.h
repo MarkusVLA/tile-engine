@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../world/obstacle.h"
+#include "../world/tile.hpp"
 #include <vector>
 
 class ObstacleManager {
@@ -13,15 +14,17 @@ public:
     }
 
     void buildObstacleMap(Map& map) {
+        obstacles.clear();
         const auto& tiles = map.getTiles();
-
         for (auto tile : tiles) {
             Vector2<double> start = tile.getRect().GetCornerA();
             Vector2<double> end = tile.getRect().GetCornerB();
             
-            std::vector<Obstacle> obstacles = tile.getObstacles();
-            for (auto obstacle : obstacles) {
-                addObstacle(obstacle);
+            if (tile.isVisible()) {
+                std::vector<Obstacle> obstacles = tile.getObstacles();
+                for (auto obstacle : obstacles) {
+                    addObstacle(obstacle);
+                }
             }
         }
     }
