@@ -4,6 +4,7 @@
 #include "../utils/vec.h"
 #include "../utils/rect.h"
 #include "obstacle.h"
+#include "../camera.hpp"
 
 enum class TileType {
 
@@ -15,17 +16,19 @@ enum class TileType {
     CENTER_WALL = 5,
     LEFT_CORNER = 6,
     RIGHT_CORNER = 7
+
 };
 
 class Tile: public GameObject {
 
 private:
     TileType type_;
+    bool isVisible_;
 
 public:
 
     Tile(Vector2<double> pos, TileType type, std::shared_ptr<SpriteManager> manager)
-        : GameObject(pos, manager, tileTypeToString(type)), type_(type) { }
+        : GameObject(pos, manager, tileTypeToString(type)), type_(type) { isVisible_ = true; }
 
 
     ~Tile() { }
@@ -69,6 +72,26 @@ public:
             case TileType::CENTER_WALL: return "center";
 
             default: return "default";
+        }
+    }
+
+
+    bool isVisible() {return isVisible_; }
+
+    void setTileVisibility(Camera cam){
+        // Set the tiles visibility.
+        Rect<double> camviewRect = cam.getViewRect();
+        if (camviewRect.Intersects(rect_)){
+            isVisible_ = true;
+        } else {
+            isVisible_ = false;
+        }
+    }
+
+
+    void draw(sf::RenderTarget &target){
+        if (isVisible_){
+            sprite_manager_->drawSprite(target, textureName_, pos_);
         }
     }
 

@@ -14,6 +14,7 @@
 #include "world/bullet.h"
 #include "utils/post_processing.h"
 #include "utils/sprite_manager.h"
+#include "world/enemies.h"
 #include <memory>
 #include <map>
 
@@ -50,6 +51,11 @@ struct Shaders {
     }
 };
 
+
+// Move this to player class
+volatile int shootCoolDonwn = 0;
+
+
 class Game {
 
 private:
@@ -69,6 +75,7 @@ private:
 
     Floor floor_;
     Player player_;
+    Enemy testEnemy_;
     Map gameMap_;
     Cursor cursor_;
     
@@ -85,7 +92,8 @@ public:
         floor_(sprite_manager_),
         player_(Vector2<double>(-30, -30), sprite_manager_),
         gameMap_(sprite_manager_),
-        cursor_(sprite_manager_)
+        cursor_(sprite_manager_),
+        testEnemy_(Vector2<double> (300, 300), sprite_manager_)
 
     {
         std::cout << "Starting game" << std::endl;
@@ -115,9 +123,105 @@ public:
     }
 
 
+    void updateGameState(void){
+
+        Vector2<double> mousePosGame = getMousePos();
+        cursor_.setPos(mousePosGame);
+
+        double moveX = (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ? -1 : (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ? 1 : 0.0f));
+        double moveY = (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ? -1 : (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ? 1 : 0.0f));
+        player_.move(Vector2<double>(moveX, moveY), gameMap_);
+        
+        // test enemy movement
+        testEnemy_.setTarget(player_.getPosition());
+        testEnemy_.follow(gameMap_); // follow the player
+        
+        // BULLETS //
+        shootCoolDonwn--;
+        bool shooting = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+        if (shooting && bullets.size() < 10 && shootCoolDonwn <= 0) {
+            Vector2<double> bulletDir = (mousePosGame - player_.getPosition()).Normalize();
+            auto newBullet = player_.shootBullet(bulletDir, light_map_);
+            bullets.push_back(newBullet);
+            shootCoolDonwn = 15;
+        }
+
+
+        light_map_->castRays(obstacle_manager_); 
+        camera_.setPosition(sf::Vector2f(static_cast<float>(player_.getX()), static_cast<float>(player_.getY())));
+        floor_.updateVisibleTiles(camera_.getView());
+        for (auto it = bullets.begin(); it != bullets.end(); ) {
+            (*it)->update(1.0 / params_.FPS);
+            if ((*it)->shouldDestroy(gameMap_)) {
+                it = bullets.erase(it);
+            } else {
+                ++it; 
+            }
+        }
+
+        gameMap_.setTileVisibility(camera_);
+
+        text_.setString(
+            "Player: " + std::to_string(player_.getX()) + ", " + std::to_string(player_.getY())
+            +"\nTiles: " + std::to_string(gameMap_.getTiles().size())
+            +"\nBullets: " + std::to_string(bullets.size())
+        );
+
+        text_.setPosition(camera_.getPosition() - sf::Vector2f(params_.renderTextureSize.x / 2, params_.renderTextureSize.y / 2));
+
+    }
+
+    void drawGameState(void){
+
+        updateRenderTargetView(targets_, camera_);
+        window_.clear();
+        targets_.renderTextureLight.clear(sf::Color(40, 40, 50));
+        targets_.renderTextureMap.clear();
+        targets_.renderTextureUI.clear();
+        floor_.draw(targets_.renderTextureMap);
+        gameMap_.draw(targets_.renderTextureMap);
+        player_.draw(targets_.renderTextureMap);
+        testEnemy_.draw(targets_.renderTextureMap);
+        targets_.renderTextureUI.draw(text_);
+        cursor_.draw(targets_.renderTextureUI);
+        targets_.renderTextureUI.display();
+        light_map_->drawLights(targets_.renderTextureLight, camera_);
+
+
+        for (auto & bullet: bullets) bullet->draw(targets_.renderTextureMap, camera_.getPosition());
+        sf::Sprite lightSprite(targets_.renderTextureLight.getTexture());
+        lightSprite.setScale(
+            {static_cast<float>(params_.windowSize.x) / params_.renderTextureSize.x, // Scale X
+            static_cast<float>(params_.windowSize.y) / params_.renderTextureSize.y}  // Scale Y
+        );
+        
+        sf::Sprite mapSprite(targets_.renderTextureMap.getTexture());
+        mapSprite.setScale(
+            {static_cast<float>(params_.windowSize.x) / params_.renderTextureSize.x, // Scale X
+            static_cast<float>(params_.windowSize.y) / params_.renderTextureSize.y}  // Scale Y
+        );
+
+        sf::Sprite renderTextureUISprite(targets_.renderTextureUI.getTexture());
+        renderTextureUISprite.setScale(
+            {static_cast<float>(params_.windowSize.x) / params_.renderTextureSize.x, // Scale X
+            static_cast<float>(params_.windowSize.y) / params_.renderTextureSize.y}  // Scale Y
+        );
+
+
+        shaders_.perspectiveShader.apply(mapSprite, sf::Vector2f(params_.windowSize));
+        shaders_.lightLayerShader.apply(lightSprite, sf::Vector2f(params_.windowSize));
+        
+        {
+            window_.draw(mapSprite, &shaders_.perspectiveShader.getShader());
+            window_.draw(lightSprite, sf::RenderStates(sf::BlendMultiply, sf::Transform(), nullptr, &shaders_.lightLayerShader.getShader()));
+            window_.draw(renderTextureUISprite, sf::BlendAdd);
+            window_.display();
+        }
+    }
+
+
     void run() {
         
-        volatile int shootCoolDonwn = 0;
         Light light2(Vector2<double>(190, 100), 200, {1.0, 0.2, 0.7}, 0.6);
         Light light3(Vector2<double>(-20, 220), 200, {0.1, 1.0, 0.6}, 0.6);
         light_map_->addLight(&light2);
@@ -132,93 +236,9 @@ public:
                 }
             }
 
-            Vector2<double> mousePosGame = getMousePos();
-            cursor_.setPos(mousePosGame);
-
-            
-            double moveX = (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ? -1 : (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ? 1 : 0.0f));
-            double moveY = (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ? -1 : (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ? 1 : 0.0f));
-            player_.move(Vector2<double>(moveX, moveY), gameMap_);
-            
-            
-            // BULLETS //
-            shootCoolDonwn--;
-            bool shooting = sf::Mouse::isButtonPressed(sf::Mouse::Left);
-            if (shooting && bullets.size() < 10 && shootCoolDonwn <= 0) {
-                Vector2<double> bulletDir = (mousePosGame - player_.getPosition()).Normalize();
-                auto newBullet = player_.shootBullet(bulletDir, light_map_);
-                bullets.push_back(newBullet);
-                shootCoolDonwn = 15;
-            }
-
-
-            light_map_->castRays(obstacle_manager_); 
-            camera_.setPosition(sf::Vector2f(static_cast<float>(player_.getX()), static_cast<float>(player_.getY())));
-            floor_.updateVisibleTiles(camera_.getView());
-            for (auto it = bullets.begin(); it != bullets.end(); ) {
-                (*it)->update(1.0 / params_.FPS);
-                if ((*it)->shouldDestroy(gameMap_)) {
-                    it = bullets.erase(it);
-                } else {
-                    ++it; 
-                }
-            }
-
-            text_.setString(
-                "Player: " + std::to_string(player_.getX()) + ", " + std::to_string(player_.getY())
-                +"\nTiles: " + std::to_string(gameMap_.getTiles().size())
-                +"\nBullets: " + std::to_string(bullets.size())
-            );
-
-            text_.setPosition(camera_.getPosition() - sf::Vector2f(params_.renderTextureSize.x / 2, params_.renderTextureSize.y / 2));
-
-
-            //////////// DRAWING /////////////
-            
-            updateRenderTargetView(targets_, camera_);
-            window_.clear();
-            targets_.renderTextureLight.clear(sf::Color(30, 30, 30));
-            targets_.renderTextureMap.clear();
-            targets_.renderTextureUI.clear();
-            floor_.draw(targets_.renderTextureMap);
-            gameMap_.draw(targets_.renderTextureMap);
-            player_.draw(targets_.renderTextureMap);
-            targets_.renderTextureUI.draw(text_);
-            cursor_.draw(targets_.renderTextureUI);
-            targets_.renderTextureUI.display();
-            light_map_->drawLights(targets_.renderTextureLight, camera_);
-
-
-            for (auto & bullet: bullets) bullet->draw(targets_.renderTextureMap, camera_.getPosition());
-            sf::Sprite lightSprite(targets_.renderTextureLight.getTexture());
-            lightSprite.setScale(
-                {static_cast<float>(params_.windowSize.x) / params_.renderTextureSize.x, // Scale X
-                static_cast<float>(params_.windowSize.y) / params_.renderTextureSize.y}  // Scale Y
-            );
-            
-            sf::Sprite mapSprite(targets_.renderTextureMap.getTexture());
-            mapSprite.setScale(
-                {static_cast<float>(params_.windowSize.x) / params_.renderTextureSize.x, // Scale X
-                static_cast<float>(params_.windowSize.y) / params_.renderTextureSize.y}  // Scale Y
-            );
-
-            sf::Sprite renderTextureUISprite(targets_.renderTextureUI.getTexture());
-            renderTextureUISprite.setScale(
-                {static_cast<float>(params_.windowSize.x) / params_.renderTextureSize.x, // Scale X
-                static_cast<float>(params_.windowSize.y) / params_.renderTextureSize.y}  // Scale Y
-            );
-
-
-            shaders_.perspectiveShader.apply(mapSprite, sf::Vector2f(params_.windowSize));
-            shaders_.lightLayerShader.apply(lightSprite, sf::Vector2f(params_.windowSize));
-            
-            {
-                window_.draw(mapSprite, &shaders_.perspectiveShader.getShader());
-                window_.draw(lightSprite, sf::RenderStates(sf::BlendMultiply, sf::Transform(), nullptr, &shaders_.lightLayerShader.getShader()));
-                window_.draw(renderTextureUISprite, sf::BlendAdd);
-                window_.display();
-            }
-            
+            updateGameState();
+            drawGameState();            
+        
         }
         
     }

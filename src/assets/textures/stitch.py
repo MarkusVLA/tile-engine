@@ -15,7 +15,7 @@ def calculate_average_color(image):
         color_tuple[channel] = sum(values) // len(values)
     return tuple(color_tuple)
 
-def stitch_textures(directory, texture_size=(16, 16), padding= 3, output_filename='texture_atlas.png', csv_filename='texture_positions.csv'):
+def stitch_textures(directory, texture_size=(16, 16), padding= 1, output_filename='texture_atlas.png', csv_filename='texture_positions.csv'):
     image_files = [f for f in os.listdir(directory) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
 
     num_images = len(image_files)

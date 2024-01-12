@@ -1,8 +1,6 @@
 
 #pragma once
-#include "gameobject.hpp"
 #include "entity.h"
-#include "tile.hpp"
 #include "../utils/vec.h"
 #include "../utils/rect.h"
 #include "map.hpp"

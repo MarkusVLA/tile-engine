@@ -10,7 +10,7 @@
 
 class Entity: public GameObject {
 
-private:
+protected:
     Vector2<double> facing_;
     double speed_;
     double animationFrame_;
@@ -27,19 +27,21 @@ public:
     
     void UpdateFrame(double dt) { animationFrame_ += dt; }
 
-
     void move(Vector2<double> dir, Map& gameMap){
+        animationFrame_ += 15.0f / 120.0f;
         // Set facing
         facing_ = dir.Normalize();
-        animationFrame_ += 15.0f / 120.0f;
         Vector2<double> delta = dir.Normalize() * speed_;
         Rect<double> newRect = getRect();
         newRect.move(delta);
         for (auto& tile: gameMap.getTiles()) {
-            Rect<double> tileRect = tile.getRect();
-            // Chek if new pos intersects with the tile and scale newPos accordingly
-            if (newRect.Intersects(tileRect)){
-                return;
+            
+            if (tile.isVisible()){
+                Rect<double> tileRect = tile.getRect();
+                // Chek if new pos intersects with the tile and scale newPos accordingly
+                if (newRect.Intersects(tileRect)){
+                    return;
+                }
             }
         }
 

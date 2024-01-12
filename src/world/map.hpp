@@ -8,6 +8,7 @@
 #include <sstream>
 #include <random>
 #include "tile.hpp"
+#include "../camera.hpp"
 
 
 #ifndef TILESIZE
@@ -16,6 +17,7 @@
 
 
 class Map {
+
 private:
     std::vector<Tile> tiles_;
     std::shared_ptr<SpriteManager> sprite_manager_;
@@ -34,14 +36,20 @@ public:
 
     std::vector<Tile> getTiles() const {
         return tiles_;
+    }  
+
+    void setTileVisibility(Camera cam){
+        for (auto& tile: tiles_){
+            tile.setTileVisibility(cam);
+        }
     }
+
 
     void draw(sf::RenderTarget &target) {
         for (auto& tile : tiles_) {
             tile.draw(target);
         }
     }
-
 
    void generateMap() {
         std::cout << "Reading map" << std::endl;
