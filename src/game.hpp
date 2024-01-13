@@ -22,7 +22,7 @@
 struct ScreenParams {
     std::string name = "Tile Game";
     sf::Vector2u windowSize = {1000, 1000};
-    sf::Vector2u renderTextureSize = {400, 400};
+    sf::Vector2u renderTextureSize = {300, 300};
     const int FPS = 120;
     ScreenParams(){}
 };
