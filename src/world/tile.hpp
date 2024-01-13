@@ -48,7 +48,6 @@ public:
             case TileType::RIGHT_CORNER: return     "right_corner";
             case TileType::CENTER_WALL: return      "center";
             case TileType::CHEST: return            "chest";
-
             default: return                         "default";
         }
     }
@@ -76,9 +75,7 @@ public:
 
 class BasicTile: public Tile {
 public:
-    BasicTile(Vector2<double> pos, TileType type, std::shared_ptr<SpriteManager> manager) : Tile(pos, type, manager) {
-        // ... additional initialization if needed ...
-    }
+    BasicTile(Vector2<double> pos, TileType type, std::shared_ptr<SpriteManager> manager) : Tile(pos, type, manager) { }
 
     std::vector<Obstacle> getObstacles(void) override {
         std::vector<Obstacle> obstacles;
@@ -97,10 +94,24 @@ public:
     }
 };
 
-class LavaTile: public Tile {
+class FrontWall: public Tile {
 
 public:
 
+    FrontWall(Vector2<double> pos, std::shared_ptr<SpriteManager> manager) 
+        : Tile(pos, TileType::FRONT_WALL, manager) {
+    }
+
+    std::vector<Obstacle> getObstacles(void) override {
+        return std::vector<Obstacle>(); // No obsticles
+    }
+
+};
+
+
+class LavaTile: public Tile {
+
+public:
     LavaTile(Vector2<double> pos, std::shared_ptr<SpriteManager> manager) 
         : Tile(pos, TileType::LAVA, manager) {
     }
@@ -132,15 +143,14 @@ public:
 
 
 class TileFactory {
+
 public:
     static std::unique_ptr<Tile> createTile(TileType type, Vector2<double> pos, std::shared_ptr<SpriteManager> manager) {
         switch (type) {
-            case TileType::LAVA:   
-                return std::make_unique<LavaTile>(pos, manager);
-            case TileType::CHEST:  
-                return std::make_unique<Container>(pos, manager);
-            default:               
-                return std::make_unique<BasicTile>(pos, type, manager);
+            case TileType::LAVA:            return std::make_unique<LavaTile>(pos, manager);
+            case TileType::CHEST:           return std::make_unique<Container>(pos, manager);
+            case TileType::FRONT_WALL:      return std::make_unique<FrontWall>(pos, manager);
+            default:                        return std::make_unique<BasicTile>(pos, type, manager);
         }
     }
 };
